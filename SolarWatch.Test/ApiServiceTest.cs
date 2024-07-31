@@ -50,7 +50,7 @@ public class Tests
 
 
     [Test]
-    public void GetAsync_ShouldRetryAndThrowException_WhenExternalApiIsDown()
+    public void GetAsync_ShouldRetryAndThrowException_WhenApiReturnsServerError()
     {
         var url = "http://example.com/api/resource";
         var request = _mockHttp.When(url).Respond(HttpStatusCode.InternalServerError);
@@ -61,7 +61,7 @@ public class Tests
     }
 
     [Test]
-    public async Task GetAsync_RetriesTwiceAndReturnsJson_WhenExternalAPIIsBackToOnline()
+    public async Task GetAsync_ShouldRetryAndReturnResponse_WhenApiRecovers()
     {
         var url = "http://example.com/api/resource";
         var expectedResponse = new ApiTestResponse { Name = "Test McGee" };
@@ -98,7 +98,7 @@ public class Tests
     [TestCase(HttpStatusCode.BadRequest, typeof(ClientException))]
     [TestCase(HttpStatusCode.NotFound, typeof(ClientException))]
     [TestCase(HttpStatusCode.Forbidden, typeof(ExternalApiException))]
-    public void GetAsync_WillThrowException_WhenResponseIsClientError_ShouldOnlyRunOnce(HttpStatusCode statusCode,
+    public void GetAsync_ShouldThrowExpectedException_ForClientErrors(HttpStatusCode statusCode,
         Type expectedException)
     {
         var url = "http://example.com/api/resource";
@@ -109,7 +109,7 @@ public class Tests
     }
 
     [Test]
-    public void GetAsync_WillThrowAnException_WhenWrongJson_OnlyRunsOnce()
+    public void GetAsync_ShouldThrowInternalServerException_WhenResponseHasInvalidJson()
     {
         var url = "http://example.com/api/resource";
         var wrongJsonFormat = new StringContent("asd", Encoding.UTF8, "application/json");
@@ -123,7 +123,7 @@ public class Tests
     [TestCase("[{\"Test\":\"Test\"}, {\"Test\":\"Test2\"}]")]
     [TestCase("[]")]
     [TestCase("")]
-    public void GetAsync_WillThrowAnException_WhenResponseIsInvalid(string content)
+    public void GetAsync_ShouldThrowClientException_WhenResponseIsInvalid(string content)
     {
         var url = "http://example.com/api/resource";
         var empty = new StringContent(content, Encoding.UTF8, "application/json");
@@ -134,7 +134,7 @@ public class Tests
     }
 
     [Test]
-    public async Task GetAsync_WillReturnFirstItem_WhenResponseIsArray()
+    public async Task GetAsync_ShouldReturnFirstItem_WhenResponseIsArray()
     {
         var url = "http://example.com/api/resource";
         var responseArray = new ApiTestResponse[]
@@ -150,7 +150,7 @@ public class Tests
     }
 
     [Test]
-    public async Task GetAsync_WillReturnArray_WhenApiServiceTypeIsArray()
+    public async Task GetAsync_ShouldReturnFullArray_WhenApiServiceTypeIsArray()
     {
         var arrayApiService = new ApiService<ApiTestResponse[]>(_httpClient, _configuration);
         var url = "http://example.com/api/resource";
