@@ -48,4 +48,6 @@ public class GeocodeApiServiceTest
         Assert.That(result, Is.EqualTo(expectedCoordinates));
         await _mockApiService.Received(1).GetAsync(url);
     }
+
+  
 }
