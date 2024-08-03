@@ -7,7 +7,7 @@ using SolarWatch.Services;
 
 namespace SolarWatch.Test.IntegrationTests;
 
-public class SunriseSunsetApiServiceIntegrationTests
+public class SunriseSunsetApiServiceTests
 {
     private SunriseSunsetApiService _sunriseSunsetApiService;
 

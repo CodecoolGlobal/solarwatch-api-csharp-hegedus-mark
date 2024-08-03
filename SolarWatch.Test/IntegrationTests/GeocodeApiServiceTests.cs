@@ -6,7 +6,7 @@ using SolarWatch.Services;
 
 namespace SolarWatch.Test.IntegrationTests;
 
-public class GeocodeApiServiceIntegrationTests
+public class GeocodeApiServiceTests
 {
     private GeocodeApiService _geocodeApiService;
 
@@ -16,7 +16,7 @@ public class GeocodeApiServiceIntegrationTests
         // Set up the configuration to use user-secrets
         var configuration = new ConfigurationBuilder()
             .AddJsonFile("appsettings.Test.json", optional: false, reloadOnChange: true)
-            .AddUserSecrets<GeocodeApiServiceIntegrationTests>()
+            .AddUserSecrets<GeocodeApiServiceTests>()
             .Build();
 
         var settings = new ExternalApiSettings

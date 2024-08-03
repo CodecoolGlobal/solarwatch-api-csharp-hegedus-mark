@@ -1,6 +1,8 @@
+using SolarWatch.Models;
+
 namespace SolarWatch.Services;
 
-public class ISunriseSunsetApiService
+public interface ISunriseSunsetApiService
 {
-    
+    public Task<SunriseSunset> GetSunriseSunsetByCoordinates(Coordinates coordinates);
 }
