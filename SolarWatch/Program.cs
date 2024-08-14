@@ -51,3 +51,8 @@ app.Run();
 public partial class Program
 {
 }
+
+//TODO: currently when we write "a" in the city field, it returns a bunch of cities and returns the first city that starts with "a". This shouldn't work honestly
+//TODO: maybe we can add regex for city validation?
+//TODO: for some reason even adding numbers returns a city
+//TODO: write more integration and unit tests for controllers pls.
