@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.Extensions.Options;
 using SolarWatch.Configuration;
 using SolarWatch.Models;
@@ -22,6 +23,10 @@ public class GeocodeApiService : IGeocodeApiService
     {
         string url = $"{_geocodeBaseUrl}/direct?q={city}&limit=1&appid={_geocodeApiKey}";
 
-        return await _apiService.GetAsync(url);
+        var responseString = await _apiService.GetAsync(url);
+
+        var content = JsonSerializer.Deserialize<List<Coordinates>>(responseString);
+
+        return content[0];
     }
 }

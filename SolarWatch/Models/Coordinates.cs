@@ -5,7 +5,15 @@ namespace SolarWatch.Models;
 
 public class Coordinates
 {
-    [JsonPropertyName("lat")] [Required] public double Latitude { get; set; }
+    [JsonPropertyName("lat")]
+    [JsonRequired]
+    public double Latitude { get; set; }
 
-    [JsonPropertyName("lon")] [Required] public double Longitude { get; set; }
+    [JsonPropertyName("lon")]
+    [JsonRequired]
+    public double Longitude { get; set; }
+
+    [JsonPropertyName("name")]
+    [JsonRequired]
+    public string Name { get; set; }
 }

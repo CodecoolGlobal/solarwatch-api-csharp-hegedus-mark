@@ -18,7 +18,7 @@ public class ApiService<T> : IApiService<T>
     private readonly HttpClient _httpClient;
     private readonly int _maxRetries;
     private readonly int _retryDelayMilliseconds;
-    
+
     /// <summary>
     /// Constructs an instance of the ApiService with the provided HttpClient and configuration.
     /// </summary>
@@ -38,7 +38,7 @@ public class ApiService<T> : IApiService<T>
     /// <param name="url">The URL to send the GET request to.</param>
     /// <returns>The deserialized response of type T.</returns>
     /// <exception cref="CriticalServerLogicException">Thrown when an unexpected exception occurs during processing.</exception>
-    public async Task<T> GetAsync(string url)
+    public async Task<string> GetAsync(string url)
     {
         return await ExecuteWithRetry(async () =>
         {
@@ -46,7 +46,7 @@ public class ApiService<T> : IApiService<T>
 
             if (response.IsSuccessStatusCode)
             {
-                return await ProcessResponseContent(response);
+                return await GetJsonString(response);
             }
 
             HandleException(response);
@@ -66,7 +66,7 @@ public class ApiService<T> : IApiService<T>
     /// <exception cref="InternalServerException">Thrown when a JSON processing error occurs.</exception>
     /// <exception cref="ExternalApiException">Thrown when all retry attempts fail.</exception>
     /// <exception cref="CriticalServerLogicException">Thrown when the retry loop completes unexpectedly.</exception>
-    private async Task<T> ExecuteWithRetry(Func<Task<T>> action)
+    private async Task<string> ExecuteWithRetry(Func<Task<string>> action)
     {
         for (int retry = 0; retry < _maxRetries; retry++)
         {
@@ -125,6 +125,12 @@ public class ApiService<T> : IApiService<T>
             _ => new ExternalApiException(
                 $"Unexpected error occured: {response.StatusCode} {response.ReasonPhrase}")
         };
+    }
+
+    private async Task<string> GetJsonString(HttpResponseMessage response)
+    {
+        var content = await response.Content.ReadAsStringAsync();
+        return content;
     }
 
     /// <summary>

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.Extensions.Options;
 using SolarWatch.Configuration;
 using SolarWatch.DTOs;
@@ -7,10 +8,10 @@ namespace SolarWatch.Services;
 
 public class SunriseSunsetApiService : ISunriseSunsetApiService
 {
-    private readonly IApiService<SunriseSunsetApiResponseDto> _apiService;
+    private readonly IApiService<SunriseSunsetApiResponse> _apiService;
     private readonly string _baseUrl;
 
-    public SunriseSunsetApiService(IApiService<SunriseSunsetApiResponseDto> apiService,
+    public SunriseSunsetApiService(IApiService<SunriseSunsetApiResponse> apiService,
         IOptions<ExternalApiSettings> configuration)
     {
         _apiService = apiService;
@@ -21,22 +22,24 @@ public class SunriseSunsetApiService : ISunriseSunsetApiService
     {
         var url = $"{_baseUrl}?lat={coordinates.Latitude}&lng={coordinates.Longitude}&formatted=0";
 
-        var response = await _apiService.GetAsync(url);
+        var responseString = await _apiService.GetAsync(url);
 
-        return MapToSunriseSunset(response);
+        var content = JsonSerializer.Deserialize<SunriseSunsetApiResponse>(responseString);
+
+        return MapToSunriseSunset(content);
     }
 
-    public SunriseSunset MapToSunriseSunset(SunriseSunsetApiResponseDto apiResponseDto)
+    public SunriseSunset MapToSunriseSunset(SunriseSunsetApiResponse apiResponse)
     {
-        if (apiResponseDto?.Results == null)
+        if (apiResponse?.Results == null)
         {
-            throw new ArgumentNullException(nameof(apiResponseDto));
+            throw new ArgumentNullException(nameof(apiResponse));
         }
 
         return new SunriseSunset
         {
-            Sunrise = TimeOnly.FromDateTime(DateTime.Parse(apiResponseDto.Results.Sunrise)),
-            Sunset = TimeOnly.FromDateTime(DateTime.Parse(apiResponseDto.Results.Sunset))
+            Sunrise = TimeOnly.FromDateTime(DateTime.Parse(apiResponse.Results.Sunrise)),
+            Sunset = TimeOnly.FromDateTime(DateTime.Parse(apiResponse.Results.Sunset))
         };
     }
 }

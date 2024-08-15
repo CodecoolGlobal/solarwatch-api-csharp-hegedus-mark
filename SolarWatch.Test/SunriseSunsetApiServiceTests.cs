@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.Extensions.Options;
 using SolarWatch.Configuration;
 using SolarWatch.DTOs;
@@ -9,14 +10,14 @@ namespace SolarWatch.Test;
 public class SunriseSunsetApiServiceTests
 {
     private SunriseSunsetApiService _sunriseSunsetApiService;
-    private IApiService<SunriseSunsetApiResponseDto> _mockApiService;
+    private IApiService<SunriseSunsetApiResponse> _mockApiService;
     private IOptions<ExternalApiSettings> _mockOptions;
 
     [SetUp]
     public void Setup()
     {
         // Mock the IApiService<SunriseSunset>
-        _mockApiService = Substitute.For<IApiService<SunriseSunsetApiResponseDto>>();
+        _mockApiService = Substitute.For<IApiService<SunriseSunsetApiResponse>>();
 
         // Mock the configuration
         var mockSettings = new ExternalApiSettings
@@ -38,9 +39,9 @@ public class SunriseSunsetApiServiceTests
         var sunriseString = "2024-07-31T05:21:48+00:00";
         var sunsetString = "2024-07-31T19:26:19+00:00";
         var coordinates = new Coordinates { Latitude = 0, Longitude = 0 };
-        var apiResponseDto = new SunriseSunsetApiResponseDto
+        var apiResponseDto = new SunriseSunsetApiResponse
         {
-            Results = new SunriseSunsetResultsDto { Sunrise = sunriseString, Sunset = sunsetString }
+            Results = new SunriseSunsetResults { Sunrise = sunriseString, Sunset = sunsetString }
         };
         var expected = new SunriseSunset
         {
@@ -48,7 +49,7 @@ public class SunriseSunsetApiServiceTests
             Sunset = TimeOnly.FromDateTime(DateTime.Parse(sunsetString))
         };
 
-        _mockApiService.GetAsync(url).Returns(apiResponseDto);
+        _mockApiService.GetAsync(url).Returns(JsonSerializer.Serialize(apiResponseDto));
 
         // Act
         var result = await _sunriseSunsetApiService.GetSunriseSunsetByCoordinates(coordinates);
@@ -58,16 +59,16 @@ public class SunriseSunsetApiServiceTests
         Assert.That(result.Sunrise, Is.EqualTo(expected.Sunrise));
         await _mockApiService.Received(1).GetAsync(url);
     }
-    
+
     [Test]
     public void MapToSunriseSunset_ShouldReturnCorrectSunriseSunset()
     {
         // Arrange
         var sunriseString = "2024-07-31T05:21:48+00:00";
         var sunsetString = "2024-07-31T19:26:19+00:00";
-        var apiResponseDto = new SunriseSunsetApiResponseDto
+        var apiResponseDto = new SunriseSunsetApiResponse
         {
-            Results = new SunriseSunsetResultsDto { Sunrise = sunriseString, Sunset = sunsetString }
+            Results = new SunriseSunsetResults { Sunrise = sunriseString, Sunset = sunsetString }
         };
         var expected = new SunriseSunset
         {
@@ -94,7 +95,7 @@ public class SunriseSunsetApiServiceTests
     public void MapToSunriseSunset_ShouldThrowArgumentNullException_WhenResultsIsNull()
     {
         // Arrange
-        var apiResponseDto = new SunriseSunsetApiResponseDto
+        var apiResponseDto = new SunriseSunsetApiResponse
         {
             Results = null
         };
@@ -102,5 +103,4 @@ public class SunriseSunsetApiServiceTests
         // Act & Assert
         Assert.Throws<ArgumentNullException>(() => _sunriseSunsetApiService.MapToSunriseSunset(apiResponseDto));
     }
-    
 }

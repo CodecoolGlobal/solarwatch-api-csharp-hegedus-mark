@@ -27,7 +27,7 @@ public class SunriseSunsetApiServiceTests
         var apiConfig = new ApiServiceConfiguration { MaxRetries = 1, RetryDelayMilliseconds = 0 };
 
         var options = Options.Create(settings);
-        var apiService = new ApiService<SunriseSunsetApiResponseDto>(new HttpClient(), apiConfig);
+        var apiService = new ApiService<SunriseSunsetApiResponse>(new HttpClient(), apiConfig);
 
         _sunriseSunsetApiService = new SunriseSunsetApiService(apiService, options);
     }

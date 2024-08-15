@@ -1,7 +1,9 @@
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using SolarWatch.Configuration;
 using SolarWatch.Models;
 using SolarWatch.Services;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace SolarWatch.Test;
 
@@ -36,10 +38,10 @@ public class GeocodeApiServiceTest
     {
         // Arrange
         var cityName = "London";
-        var expectedCoordinates = new Coordinates { Latitude = 51.5074, Longitude = -0.1278 };
+        var expectedCoordinates = new Coordinates { Latitude = 51.5074, Longitude = -0.1278, Name = "asd"};
         var url = "https://api.geocode.com/direct?q=London&limit=1&appid=test_api_key";
         
-        _mockApiService.GetAsync(url).Returns(expectedCoordinates);
+        _mockApiService.GetAsync(url).Returns(JsonSerializer.Serialize(expectedCoordinates));
 
         // Act
         var result = await _geocodeApiService.GetCoordinatesByCityName(cityName);
