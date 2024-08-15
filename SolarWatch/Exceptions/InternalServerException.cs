@@ -1,3 +1,3 @@
 namespace SolarWatch.Exceptions;
 
-public class InternalServerException(string message, Exception? innerException = null) : ApiException(message);
+public class InternalServerException(string message, Exception? innerException = null) : CustomException(message);

@@ -1,3 +1,3 @@
 namespace SolarWatch.Exceptions;
 
-public class CriticalServerLogicException(string message) : ApiException(message);
+public class CriticalServerLogicException(string message) : CustomException(message);

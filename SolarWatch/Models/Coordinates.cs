@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace SolarWatch.Models;
 
-public class Coordinates
+public struct Coordinates
 {
     [JsonPropertyName("lat")]
     [JsonRequired]

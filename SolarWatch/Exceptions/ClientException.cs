@@ -1,6 +1,6 @@
 namespace SolarWatch.Exceptions;
 
-public class ClientException(string message) : ApiException(message);
+public class ClientException(string message) : CustomException(message);
 
 
 

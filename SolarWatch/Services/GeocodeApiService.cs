@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Microsoft.Extensions.Options;
 using SolarWatch.Configuration;
+using SolarWatch.Exceptions;
 using SolarWatch.Models;
 
 namespace SolarWatch.Services;
@@ -26,6 +27,12 @@ public class GeocodeApiService : IGeocodeApiService
         var responseString = await _apiService.GetAsync(url);
 
         var content = JsonSerializer.Deserialize<List<Coordinates>>(responseString);
+
+        if (content is null || content.Count == 0)
+        {
+            throw new NotFoundException($"No coordinates found for city: {city}");
+        }
+
 
         return content[0];
     }
