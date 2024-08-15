@@ -35,7 +35,7 @@ public class SunriseSunsetController : ControllerBase
             Console.WriteLine(e);
             return BadRequest(e.Message);
         }
-        catch (ExternalCustomException e)
+        catch (ExternalApiException e)
         {
             Console.WriteLine(e);
             return StatusCode(StatusCodes.Status502BadGateway, "Error communicating with the external API");

@@ -1,3 +1,3 @@
 namespace SolarWatch.Exceptions;
 
-public class CustomException(string message) : Exception(message);
+public abstract class CustomException(string message) : Exception(message);

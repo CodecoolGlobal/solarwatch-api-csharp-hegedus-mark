@@ -33,7 +33,9 @@ public class GeocodeApiService : IGeocodeApiService
             throw new NotFoundException($"No coordinates found for city: {city}");
         }
 
+        var matchedCity = content.FirstOrDefault(coordinates => coordinates.Name == city) ??
+                          throw new NotFoundException($"City with name {city} not found!");
 
-        return content[0];
+        return matchedCity;
     }
 }

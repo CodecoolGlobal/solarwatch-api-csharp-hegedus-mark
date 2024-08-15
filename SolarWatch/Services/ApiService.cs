@@ -64,7 +64,7 @@ public class ApiService<T> : IApiService<T>
     /// <param name="action">The asynchronous action to execute.</param>
     /// <returns>The result of the action.</returns>
     /// <exception cref="InternalServerException">Thrown when a JSON processing error occurs.</exception>
-    /// <exception cref="ExternalCustomException">Thrown when all retry attempts fail.</exception>
+    /// <exception cref="ExternalApiException">Thrown when all retry attempts fail.</exception>
     /// <exception cref="CriticalServerLogicException">Thrown when the retry loop completes unexpectedly.</exception>
     private async Task<string> ExecuteWithRetry(Func<Task<string>> action)
     {
@@ -80,11 +80,7 @@ public class ApiService<T> : IApiService<T>
             }
             catch (HttpRequestException e)
             {
-                throw new ExternalCustomException("All retry attempts failed.", e);
-            }
-            catch (Exception e)
-            {
-                throw new InternalServerException("Unexpected exception occured!", e);
+                throw new ExternalApiException("All retry attempts failed.", e);
             }
         }
 
@@ -99,7 +95,7 @@ public class ApiService<T> : IApiService<T>
     /// <param name="response">The HTTP response message containing the error details.</param>
     /// <exception cref="ClientException">Thrown for client-side errors (e.g., 400, 404).</exception>
     /// <exception cref="HttpRequestException">Thrown for server-side errors (e.g., 500 and above).</exception>
-    /// <exception cref="ExternalCustomException">Thrown for unexpected errors not covered by specific exceptions.</exception>
+    /// <exception cref="ExternalApiException">Thrown for unexpected errors not covered by specific exceptions.</exception>
     private static void HandleException(HttpResponseMessage response)
     {
         var statusCode = (int)response.StatusCode;
@@ -113,7 +109,7 @@ public class ApiService<T> : IApiService<T>
             >= 500 => new HttpRequestException(
                 $"External Api Server Error: {response.StatusCode} {response.ReasonPhrase}"),
 
-            _ => new ExternalCustomException(
+            _ => new ExternalApiException(
                 $"Unexpected error occured: {response.StatusCode} {response.ReasonPhrase}")
         };
     }
