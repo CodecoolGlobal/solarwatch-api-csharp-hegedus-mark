@@ -63,7 +63,7 @@ public class Tests
     public async Task GetAsync_ShouldRetryAndReturnResponse_WhenApiRecovers()
     {
         var url = "http://example.com/api/resource";
-        var expectedResponse = new ApiTestResponse { Name = "Test McGee" };
+        var expectedResponse = "{\"test\": \"test\"}";
 
         // Define a list of responses
         var responses = new List<HttpResponseMessage>
@@ -73,7 +73,7 @@ public class Tests
             new(HttpStatusCode.OK)
             {
                 Content = new StringContent(
-                    JsonSerializer.Serialize(expectedResponse),
+                    expectedResponse,
                     System.Text.Encoding.UTF8,
                     "application/json")
             }
@@ -90,6 +90,7 @@ public class Tests
         var result = await _apiService.GetAsync(url);
 
         Assert.That(_mockHttp.GetMatchCount(request), Is.EqualTo(3));
+        Assert.That(result, Is.EqualTo(expectedResponse));
     }
 
 
@@ -130,7 +131,7 @@ public class Tests
 
         Assert.ThrowsAsync<ClientException>(() => _apiService.GetAsync(url));
     }*/
-    
+
     /*public async Task GetAsync_ShouldReturnFirstItem_WhenResponseIsArray()
     {
         var url = "http://example.com/api/resource";
