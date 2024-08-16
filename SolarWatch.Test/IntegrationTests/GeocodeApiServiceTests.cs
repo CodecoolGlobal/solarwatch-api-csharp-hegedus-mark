@@ -32,7 +32,7 @@ public class GeocodeApiServiceTests
 
         _geocodeApiService = new GeocodeApiService(apiService, options);
     }
-    
+
     [Test]
     [Category("Integration")]
     public async Task GetCoordinatesByCityName_ShouldReturnValidCoordinates()
@@ -41,7 +41,8 @@ public class GeocodeApiServiceTests
         var cityName = "London";
 
         // Act
-        var result = await _geocodeApiService.GetCoordinatesByCityName(cityName);
+        var results = await _geocodeApiService.GetCoordinatesByCityName(cityName);
+        var result = results.ToList()[0];
 
         // Assert
         Assert.IsNotNull(result);

@@ -48,7 +48,8 @@ public class GeocodeApiServiceTest
         _mockApiService.GetAsync(url).Returns(JsonSerializer.Serialize(expectedCoordinates));
 
         // Act
-        var result = await _geocodeApiService.GetCoordinatesByCityName(cityName);
+        var results = await _geocodeApiService.GetCoordinatesByCityName(cityName);
+        var result = results.ToList()[0];
 
         // Assert
         Assert.That(result.Name, Is.EqualTo(cityName));
@@ -100,7 +101,8 @@ public class GeocodeApiServiceTest
         var url = $"https://api.geocode.com/direct?q={requestedCityName}&limit=1&appid=test_api_key";
         _mockApiService.GetAsync(url).Returns(jsonResponse);
 
-        var result = await _geocodeApiService.GetCoordinatesByCityName(requestedCityName);
+        var results = await _geocodeApiService.GetCoordinatesByCityName(requestedCityName);
+        var result = results.ToList()[0];
 
         Assert.That(result.Name, Is.EqualTo(requestedCityName));
     }

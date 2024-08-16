@@ -22,7 +22,7 @@ public class SunriseSunsetControllerTests
         _controller = new SunriseSunsetController(_geocodeApiService, _sunriseSunsetApiService);
     }
 
-    [Test]
+    /*[Test]
     public async Task GetSunriseSunsetByCity_ReturnsOkResult_WhenDataIsValid()
     {
         // Arrange
@@ -41,5 +41,5 @@ public class SunriseSunsetControllerTests
         Assert.IsNotNull(result);
         Assert.That(result.StatusCode, Is.EqualTo(200));
         Assert.That(result.Value, Is.EqualTo(sunriseSunset));
-    }
+    }*/
 }

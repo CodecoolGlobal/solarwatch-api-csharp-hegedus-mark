@@ -70,6 +70,7 @@ public class SunriseSunsetApiServiceTests
         {
             Results = new SunriseSunsetResults { Sunrise = sunriseString, Sunset = sunsetString }
         };
+        var coordinates = new Coordinates { Name = "test", State = "test", Country = "test" };
         var expected = new SunriseSunset
         {
             Sunrise = TimeOnly.FromDateTime(DateTime.Parse(sunriseString)),
@@ -77,7 +78,7 @@ public class SunriseSunsetApiServiceTests
         };
 
         // Act
-        var result = _sunriseSunsetApiService.MapToSunriseSunset(apiResponseDto);
+        var result = _sunriseSunsetApiService.MapToSunriseSunset(apiResponseDto, coordinates);
 
         // Assert
         Assert.That(result.Sunrise, Is.EqualTo(expected.Sunrise));
@@ -88,7 +89,7 @@ public class SunriseSunsetApiServiceTests
     public void MapToSunriseSunset_ShouldThrowArgumentNullException_WhenApiResponseDtoIsNull()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => _sunriseSunsetApiService.MapToSunriseSunset(null));
+        Assert.Throws<ArgumentNullException>(() => _sunriseSunsetApiService.MapToSunriseSunset(null, null));
     }
 
     [Test]
@@ -99,8 +100,11 @@ public class SunriseSunsetApiServiceTests
         {
             Results = null
         };
+        var coordinates = new Coordinates { Name = "test", State = "test", Country = "test" };
+
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => _sunriseSunsetApiService.MapToSunriseSunset(apiResponseDto));
+        Assert.Throws<ArgumentNullException>(() =>
+            _sunriseSunsetApiService.MapToSunriseSunset(apiResponseDto, coordinates));
     }
 }
