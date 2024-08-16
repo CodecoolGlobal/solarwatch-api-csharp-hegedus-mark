@@ -8,6 +8,7 @@ namespace SolarWatch.Services;
 
 public class GeocodeApiService : IGeocodeApiService
 {
+    private const int LIMIT = 5;
     private readonly IApiService<Coordinates> _apiService;
     private readonly string _geocodeBaseUrl;
     private readonly string _geocodeApiKey;
@@ -20,9 +21,9 @@ public class GeocodeApiService : IGeocodeApiService
     }
 
 
-    public async Task<Coordinates> GetCoordinatesByCityName(string city)
+    public async Task<IEnumerable<Coordinates>> GetCoordinatesByCityName(string city)
     {
-        string url = $"{_geocodeBaseUrl}/direct?q={city}&limit=1&appid={_geocodeApiKey}";
+        string url = $"{_geocodeBaseUrl}/direct?q={city}&limit={LIMIT}&appid={_geocodeApiKey}";
 
         var responseString = await _apiService.GetAsync(url);
 
@@ -33,9 +34,9 @@ public class GeocodeApiService : IGeocodeApiService
             throw new NotFoundException($"No coordinates found for city: {city}");
         }
 
-        var matchedCity = content.FirstOrDefault(coordinates => coordinates.Name == city) ??
-                          throw new NotFoundException($"City with name {city} not found!");
+        var matchedCities = content.Where(coordinates => coordinates.Name.Contains(city)) ??
+                            throw new NotFoundException($"City with name {city} not found!");
 
-        return matchedCity;
+        return matchedCities;
     }
 }

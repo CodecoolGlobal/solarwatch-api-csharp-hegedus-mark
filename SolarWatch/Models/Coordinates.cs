@@ -16,4 +16,10 @@ public class Coordinates
     [JsonPropertyName("name")]
     [JsonRequired]
     public string Name { get; set; }
+
+    [JsonPropertyName("country")]
+    [Required]
+    public string Country { get; init; }
+
+    [JsonPropertyName("state")] [Required] public string State { get; init; }
 }

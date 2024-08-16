@@ -21,19 +21,30 @@ public class SunriseSunsetController : ControllerBase
     }
 
     [HttpGet("{city}")]
-    public async Task<ActionResult<SunriseSunset>> GetSunriseSunsetByCity(string city)
+    public async Task<ActionResult<List<SunriseSunset>>> GetSunriseSunsetByCity(string city)
     {
         try
         {
+            var cities = new List<SunriseSunset>();
             var coordinates = await _geocodeApiService.GetCoordinatesByCityName(city);
-            var sunriseSunset = await _sunriseSunsetApiService.GetSunriseSunsetByCoordinates(coordinates);
+            foreach (var coordinate in coordinates)
+            {
+                var result = await _sunriseSunsetApiService.GetSunriseSunsetByCoordinates(coordinate);
+                if (result is null) continue;
+                cities.Add(result);
+            }
 
-            return Ok(sunriseSunset);
+            return Ok(cities);
         }
         catch (ClientException e)
         {
             Console.WriteLine(e);
             return BadRequest(e.Message);
+        }
+        catch (NotFoundException e)
+        {
+            Console.WriteLine(e);
+            return NotFound(e.Message);
         }
         catch (ExternalApiException e)
         {
@@ -44,6 +55,11 @@ public class SunriseSunsetController : ControllerBase
         {
             Console.WriteLine(e);
             return StatusCode(StatusCodes.Status500InternalServerError, "An Error occured, please try again later.");
+        }
+        catch (Exception e)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                "An Unexpected error occured, please try again later.");
         }
     }
 }
