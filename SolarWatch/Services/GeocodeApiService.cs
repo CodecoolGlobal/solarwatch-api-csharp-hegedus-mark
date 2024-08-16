@@ -34,7 +34,7 @@ public class GeocodeApiService : IGeocodeApiService
             throw new NotFoundException($"No coordinates found for city: {city}");
         }
 
-        var matchedCities = content.Where(coordinates => coordinates.Name.Contains(city)) ??
+        var matchedCities = content.Where(coordinates => coordinates.Name.Contains(city, StringComparison.CurrentCultureIgnoreCase)) ??
                             throw new NotFoundException($"City with name {city} not found!");
 
         return matchedCities;
