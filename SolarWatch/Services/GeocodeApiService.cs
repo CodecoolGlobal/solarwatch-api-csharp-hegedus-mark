@@ -8,7 +8,7 @@ namespace SolarWatch.Services;
 
 public class GeocodeApiService : IGeocodeApiService
 {
-    private const int LIMIT = 5;
+    public const int LIMIT = 5;
     private readonly IApiService<Coordinates> _apiService;
     private readonly string _geocodeBaseUrl;
     private readonly string _geocodeApiKey;
@@ -34,8 +34,13 @@ public class GeocodeApiService : IGeocodeApiService
             throw new NotFoundException($"No coordinates found for city: {city}");
         }
 
-        var matchedCities = content.Where(coordinates => coordinates.Name.Contains(city, StringComparison.CurrentCultureIgnoreCase)) ??
-                            throw new NotFoundException($"City with name {city} not found!");
+        var matchedCities = content.Where(coordinates =>
+            coordinates.Name.Contains(city, StringComparison.CurrentCultureIgnoreCase)).ToList();
+
+        if (matchedCities.Count == 0)
+        {
+            throw new NotFoundException($"No matched Cities found for city: {city}");
+        }
 
         return matchedCities;
     }

@@ -10,9 +10,12 @@ namespace SolarWatch.Test;
 
 public class GeocodeApiServiceTest
 {
+    private const string BASE_URL = "https://api.geocode.com";
+    private const string API_KEY = "test_api_key";
     private GeocodeApiService _geocodeApiService;
     private IApiService<Coordinates> _mockApiService;
     private IOptions<ExternalApiSettings> _mockOptions;
+    private const int LIMIT = GeocodeApiService.LIMIT;
 
     [SetUp]
     public void Setup()
@@ -24,8 +27,8 @@ public class GeocodeApiServiceTest
         // Mock the configuration
         var mockSettings = new ExternalApiSettings
         {
-            GeocodeBaseUrl = "https://api.geocode.com",
-            GeocodeApiKey = "test_api_key"
+            GeocodeBaseUrl = BASE_URL,
+            GeocodeApiKey = API_KEY
         };
         _mockOptions = Substitute.For<IOptions<ExternalApiSettings>>();
         _mockOptions.Value.Returns(mockSettings);
@@ -43,7 +46,8 @@ public class GeocodeApiServiceTest
         {
             new() { Latitude = 51.5074, Longitude = -0.1278, Name = cityName }
         };
-        var url = $"https://api.geocode.com/direct?q={cityName}&limit=1&appid=test_api_key";
+        var url =
+            $"{BASE_URL}/direct?q={cityName}&limit={LIMIT}&appid={API_KEY}";
 
         _mockApiService.GetAsync(url).Returns(JsonSerializer.Serialize(expectedCoordinates));
 
@@ -60,7 +64,7 @@ public class GeocodeApiServiceTest
     public void GetCoordinatesByCityName_NonExistentCity_ShouldThrowNotFoundException()
     {
         var cityName = "Non-Existent-City";
-        var url = $"https://api.geocode.com/direct?q={cityName}&limit=1&appid=test_api_key";
+        var url = $"{BASE_URL}/direct?q={cityName}&limit={LIMIT}&appid={API_KEY}";
         _mockApiService.GetAsync(url).Returns("[]");
 
         // Act
@@ -77,34 +81,40 @@ public class GeocodeApiServiceTest
     public void GetCoordinatesByCityName_WrongData_ThrowsJsonException(string response)
     {
         var cityName = "testCity";
-        var url = $"https://api.geocode.com/direct?q={cityName}&limit=1&appid=test_api_key";
+        var url = $"{BASE_URL}/direct?q={cityName}&limit={LIMIT}&appid={API_KEY}";
         _mockApiService.GetAsync(url).Returns(response);
 
         Assert.ThrowsAsync<JsonException>(() => _geocodeApiService.GetCoordinatesByCityName(cityName));
     }
 
     [Test]
-    public async Task GetCoordinatesByCityName_MultipleItems_ReturnsTheCityThatMatchesTheRequest()
+    public async Task GetCoordinatesByCityName_MultipleItems_ReturnsCitiesThatMatchesTheRequest()
     {
         // Create a list of Coordinates objects
         var cities = new List<Coordinates>
         {
-            new Coordinates { Latitude = 40.7128, Longitude = -74.0060, Name = "testCity" },
-            new Coordinates { Latitude = 34.0522, Longitude = -118.2437, Name = "testCityAlpha" },
-            new Coordinates { Latitude = 37.7749, Longitude = -122.4194, Name = "testCityBeta" }
+            new Coordinates
+                { Latitude = 40.7128, Longitude = -74.0060, Name = "testCity", State = "test", Country = "test" },
+            new Coordinates
+                { Latitude = 34.0522, Longitude = -118.2437, Name = "testCityAlpha", State = "test", Country = "test" },
+            new Coordinates
+                { Latitude = 37.7749, Longitude = -122.4194, Name = "test", State = "test", Country = "test" }
         };
 
         // Serialize the list to a JSON string
         var jsonResponse = JsonSerializer.Serialize(cities);
 
         var requestedCityName = "testCity";
-        var url = $"https://api.geocode.com/direct?q={requestedCityName}&limit=1&appid=test_api_key";
+        var url =
+            $"{BASE_URL}/direct?q={requestedCityName}&limit={LIMIT}&appid={API_KEY}";
         _mockApiService.GetAsync(url).Returns(jsonResponse);
 
         var results = await _geocodeApiService.GetCoordinatesByCityName(requestedCityName);
-        var result = results.ToList()[0];
+        var resultsList = results.ToList();
 
-        Assert.That(result.Name, Is.EqualTo(requestedCityName));
+        Assert.That(resultsList, Has.Count.EqualTo(2));
+        Assert.That(resultsList, Contains.Item(cities[1]));
+        Assert.That(resultsList, Contains.Item(cities[0]));
     }
 
     [Test]
@@ -113,15 +123,18 @@ public class GeocodeApiServiceTest
         // Create a list of Coordinates objects without the requested city name
         var cities = new List<Coordinates>
         {
-            new Coordinates { Latitude = 34.0522, Longitude = -118.2437, Name = "testCityAlpha" },
-            new Coordinates { Latitude = 37.7749, Longitude = -122.4194, Name = "testCityBeta" }
+            new Coordinates
+                { Latitude = 34.0522, Longitude = -118.2437, Name = "notMatched2", State = "test", Country = "test" },
+            new Coordinates
+                { Latitude = 37.7749, Longitude = -122.4194, Name = "notMatched1", State = "test", Country = "test" }
         };
 
         // Serialize the list to a JSON string
         var jsonResponse = JsonSerializer.Serialize(cities);
 
         var requestedCityName = "testCity";
-        var url = $"https://api.geocode.com/direct?q={requestedCityName}&limit=1&appid=test_api_key";
+        var url =
+            $"{BASE_URL}/direct?q={requestedCityName}&limit={LIMIT}&appid={API_KEY}";
         _mockApiService.GetAsync(url).Returns(jsonResponse);
 
         // Act & Assert
