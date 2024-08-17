@@ -22,6 +22,5 @@ public class CoordinatesExternalApiResponse
     public string Country { get; init; }
 
     [JsonPropertyName("state")]
-    [JsonRequired]
-    public string State { get; init; }
+    public string? State { get; init; }
 }

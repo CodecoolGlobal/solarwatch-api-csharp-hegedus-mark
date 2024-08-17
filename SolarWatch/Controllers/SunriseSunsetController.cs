@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using SolarWatch.Data.Models;
 using SolarWatch.DTOs;
 using SolarWatch.Exceptions;
-using SolarWatch.Models;
 using SolarWatch.Services;
 
 namespace SolarWatch.Controllers;
@@ -10,44 +10,27 @@ namespace SolarWatch.Controllers;
 [ApiController]
 public class SunriseSunsetController : ControllerBase
 {
-    private readonly IGeocodeApiService _geocodeApiService;
-    private readonly ISunriseSunsetApiService _sunriseSunsetApiService;
+    private readonly ICityDataService _cityDataService;
 
 
-    public SunriseSunsetController(IGeocodeApiService geocodeApiService,
-        ISunriseSunsetApiService sunriseSunsetApiService)
+    public SunriseSunsetController(ICityDataService cityDataService)
     {
-        _geocodeApiService = geocodeApiService;
-        _sunriseSunsetApiService = sunriseSunsetApiService;
+        _cityDataService = cityDataService;
     }
 
-    [HttpGet("{city}")]
-    public async Task<ActionResult<List<SunriseSunset>>> GetSunriseSunsetByCity(string city)
+    [HttpGet("{cityName}")]
+    public async Task<ActionResult<List<SunriseSunset>>> GetSunriseSunsetByCity(string cityName)
     {
         try
         {
-            var citiesWithSunriseSunset  = new List<CityWithSunriseSunsetResponse>();
-            var coordinates = await _geocodeApiService.GetCoordinatesByCityName(city);
-            foreach (var coordinate in coordinates)
-            {
-                var sunriseSunset = await _sunriseSunsetApiService.GetSunriseSunsetByCoordinates(coordinate);
-                if (sunriseSunset is null) continue;
-                
-                var cityWithSunriseSunset = new CityWithSunriseSunsetResponse
-                {
-                    Name = coordinate.Name,
-                    Country = coordinate.Country,
-                    State = coordinate.State,
-                    Latitude = coordinate.Latitude,
-                    Longitude = coordinate.Longitude,
-                    Sunrise = sunriseSunset.Sunrise,
-                    Sunset = sunriseSunset.Sunset,
-                };
-            
-                citiesWithSunriseSunset.Add(cityWithSunriseSunset);
-            }
+            var results = await _cityDataService.GetCityData(cityName);
 
-            return Ok(citiesWithSunriseSunset);
+            if (results.Count < 0)
+            {
+                return NotFound();
+            }
+            
+            return Ok(results);
         }
         catch (ClientException e)
         {

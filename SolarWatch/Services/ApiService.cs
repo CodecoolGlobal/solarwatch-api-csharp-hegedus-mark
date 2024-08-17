@@ -3,7 +3,6 @@ using System.Text.Json;
 using SolarWatch.Configuration;
 using SolarWatch.Exceptions;
 
-//TODO: Remove validation from here and put it in the actual ApiService classes, this should only send a JSON string,
 //The only thing this should check is if the string is an empty array, object or string. that's it.
 
 namespace SolarWatch.Services;

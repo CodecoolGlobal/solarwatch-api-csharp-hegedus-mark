@@ -1,8 +1,12 @@
+using Microsoft.EntityFrameworkCore;
 using SolarWatch.Configuration;
-using SolarWatch.DTOs;
-using SolarWatch.Models;
+using SolarWatch.Data;
 using SolarWatch.Services;
+using dotenv.net;
+using SolarWatch.Data.Repositories;
 
+
+DotEnv.Load();
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -12,6 +16,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddDbContext<SolarWatchDbContext>(options =>
+{
+    var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DbConnection");
+    options.UseSqlServer(connectionString);
+});
 builder.Services.Configure<ExternalApiSettings>(builder.Configuration.GetSection("ExternalApiSettings"));
 builder.Services.AddSingleton<HttpClient>();
 builder.Services.AddSingleton(new ApiServiceConfiguration
@@ -22,6 +31,8 @@ builder.Services.AddSingleton(new ApiServiceConfiguration
 builder.Services.AddTransient<IApiService, ApiService>();
 builder.Services.AddTransient<IGeocodeApiService, GeocodeApiService>();
 builder.Services.AddTransient<ISunriseSunsetApiService, SunriseSunsetApiService>();
+builder.Services.AddTransient<ICityRepository, CityRepository>();
+builder.Services.AddTransient<ICityDataService, CityDataService>();
 
 
 var app = builder.Build();
@@ -45,8 +56,3 @@ app.Run();
 public partial class Program
 {
 }
-
-//TODO: currently when we write "a" in the city field, it returns a bunch of cities and returns the first city that starts with "a". This shouldn't work honestly
-//TODO: maybe we can add regex for city validation?
-//TODO: for some reason even adding numbers returns a city
-//TODO: write more integration and unit tests for controllers pls.

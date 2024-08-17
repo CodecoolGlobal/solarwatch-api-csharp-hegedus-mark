@@ -1,4 +1,4 @@
-using SolarWatch.Models;
+using SolarWatch.Data.Models;
 
 namespace SolarWatch.Services;
 
