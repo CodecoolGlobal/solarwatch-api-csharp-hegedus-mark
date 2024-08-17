@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using SolarWatch.DTOs;
 using SolarWatch.Exceptions;
 using SolarWatch.Models;
 using SolarWatch.Services;
@@ -25,16 +26,28 @@ public class SunriseSunsetController : ControllerBase
     {
         try
         {
-            var cities = new List<SunriseSunset>();
+            var citiesWithSunriseSunset  = new List<CityWithSunriseSunsetResponse>();
             var coordinates = await _geocodeApiService.GetCoordinatesByCityName(city);
             foreach (var coordinate in coordinates)
             {
-                var result = await _sunriseSunsetApiService.GetSunriseSunsetByCoordinates(coordinate);
-                if (result is null) continue;
-                cities.Add(result);
+                var sunriseSunset = await _sunriseSunsetApiService.GetSunriseSunsetByCoordinates(coordinate);
+                if (sunriseSunset is null) continue;
+                
+                var cityWithSunriseSunset = new CityWithSunriseSunsetResponse
+                {
+                    Name = coordinate.Name,
+                    Country = coordinate.Country,
+                    State = coordinate.State,
+                    Latitude = coordinate.Latitude,
+                    Longitude = coordinate.Longitude,
+                    Sunrise = sunriseSunset.Sunrise,
+                    Sunset = sunriseSunset.Sunset,
+                };
+            
+                citiesWithSunriseSunset.Add(cityWithSunriseSunset);
             }
 
-            return Ok(cities);
+            return Ok(citiesWithSunriseSunset);
         }
         catch (ClientException e)
         {

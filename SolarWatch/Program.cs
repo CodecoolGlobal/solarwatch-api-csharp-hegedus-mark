@@ -19,8 +19,7 @@ builder.Services.AddSingleton(new ApiServiceConfiguration
     MaxRetries = 3,
     RetryDelayMilliseconds = 1000
 });
-builder.Services.AddTransient<IApiService<SunriseSunsetApiResponse>, ApiService<SunriseSunsetApiResponse>>();
-builder.Services.AddTransient<IApiService<Coordinates>, ApiService<Coordinates>>();
+builder.Services.AddTransient<IApiService, ApiService>();
 builder.Services.AddTransient<IGeocodeApiService, GeocodeApiService>();
 builder.Services.AddTransient<ISunriseSunsetApiService, SunriseSunsetApiService>();
 

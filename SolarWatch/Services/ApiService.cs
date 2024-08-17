@@ -13,7 +13,7 @@ namespace SolarWatch.Services;
 /// Includes retry logic for transient failures and error handling for various response statuses.
 /// </summary>
 /// <typeparam name="T">The type of the object to be retrieved and deserialized from the API.</typeparam>
-public class ApiService<T> : IApiService<T>
+public class ApiService : IApiService
 {
     private readonly HttpClient _httpClient;
     private readonly int _maxRetries;
@@ -118,83 +118,6 @@ public class ApiService<T> : IApiService<T>
     {
         var content = await response.Content.ReadAsStringAsync();
         return content;
-    }
-
-    /// <summary>
-    /// Processes the content of an HTTP response, deserializing it and validating the result.
-    /// </summary>
-    /// <param name="response">The HTTP response message containing the content to process.</param>
-    /// <returns>The deserialized and validated result of type T.</returns>
-    /// <exception cref="ClientException">Thrown if the response content is invalid or empty.</exception>
-    private async Task<T> ProcessResponseContent(HttpResponseMessage response)
-    {
-        var content = await response.Content.ReadAsStringAsync();
-
-        if (string.IsNullOrWhiteSpace(content) || content == "[]")
-        {
-            throw new ClientException("The requested resource is not found, it is empty");
-        }
-
-        var firstItem = TryDeserializeArrayAndGetFirstItem(content);
-
-        if (firstItem != null)
-        {
-            if (!IsValid(firstItem))
-            {
-                throw new ClientException("The requested resource contains invalid items.");
-            }
-
-            return firstItem;
-        }
-
-        var singleResult = JsonSerializer.Deserialize<T>(content);
-
-        if (!IsValid(singleResult))
-        {
-            throw new ClientException("The requested resource contains invalid items.");
-        }
-
-        return singleResult!;
-    }
-
-    /// <summary>
-    /// Tries to deserialize the response content as a list and returns the first item if available.
-    /// </summary>
-    /// <param name="content">The response content to deserialize.</param>
-    /// <returns>The first item of the deserialized list or default if deserialization fails or the list is empty.</returns>
-    private T? TryDeserializeArrayAndGetFirstItem(string content)
-    {
-        List<T> arrayResult;
-        try
-        {
-            arrayResult = JsonSerializer.Deserialize<List<T>>(content) ?? throw new JsonException();
-        }
-        catch (JsonException e)
-        {
-            return default;
-        }
-
-        return arrayResult is { Count: > 0 } ? arrayResult.First() : default;
-    }
-
-    /// <summary>
-    /// Validates an object using data annotations.
-    /// </summary>
-    /// <param name="obj">The object to validate.</param>
-    /// <returns>True if the object is valid; otherwise, false.</returns>
-    private bool IsValid(T? obj)
-    {
-        if (obj == null)
-        {
-            return false;
-        }
-
-
-        var context = new ValidationContext(obj);
-        var results = new List<ValidationResult>();
-        bool isValid = Validator.TryValidateObject(obj, context, results, true);
-
-        return isValid;
     }
 
     /// <summary>

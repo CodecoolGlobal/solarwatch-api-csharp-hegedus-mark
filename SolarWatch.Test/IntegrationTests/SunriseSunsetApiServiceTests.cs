@@ -27,7 +27,7 @@ public class SunriseSunsetApiServiceTests
         var apiConfig = new ApiServiceConfiguration { MaxRetries = 1, RetryDelayMilliseconds = 0 };
 
         var options = Options.Create(settings);
-        var apiService = new ApiService<SunriseSunsetApiResponse>(new HttpClient(), apiConfig);
+        var apiService = new ApiService(new HttpClient(), apiConfig);
 
         _sunriseSunsetApiService = new SunriseSunsetApiService(apiService, options);
     }
@@ -35,7 +35,7 @@ public class SunriseSunsetApiServiceTests
     [Test]
     public async Task GetSunriseSunsetByCoordinates_ReturnsSunriseAndSunset()
     {
-        var coordinates = new Coordinates { Longitude = 0, Latitude = 0 };
+        var coordinates = new City { Longitude = 0, Latitude = 0 };
 
         var result = await _sunriseSunsetApiService.GetSunriseSunsetByCoordinates(coordinates);
         

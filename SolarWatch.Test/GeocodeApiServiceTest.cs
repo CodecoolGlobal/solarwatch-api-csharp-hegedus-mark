@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 using SolarWatch.Configuration;
+using SolarWatch.DTOs;
 using SolarWatch.Exceptions;
 using SolarWatch.Models;
 using SolarWatch.Services;
@@ -13,7 +14,7 @@ public class GeocodeApiServiceTest
     private const string BASE_URL = "https://api.geocode.com";
     private const string API_KEY = "test_api_key";
     private GeocodeApiService _geocodeApiService;
-    private IApiService<Coordinates> _mockApiService;
+    private IApiService _mockApiService;
     private IOptions<ExternalApiSettings> _mockOptions;
     private const int LIMIT = GeocodeApiService.LIMIT;
 
@@ -21,7 +22,7 @@ public class GeocodeApiServiceTest
     public void Setup()
     {
         // Mock the IApiService<Coordinates>
-        _mockApiService = Substitute.For<IApiService<Coordinates>>();
+        _mockApiService = Substitute.For<IApiService>();
 
 
         // Mock the configuration
@@ -42,7 +43,7 @@ public class GeocodeApiServiceTest
     {
         // Arrange
         var cityName = "London";
-        var expectedCoordinates = new List<Coordinates>
+        var expectedCoordinates = new List<City>
         {
             new() { Latitude = 51.5074, Longitude = -0.1278, Name = cityName }
         };
@@ -91,13 +92,13 @@ public class GeocodeApiServiceTest
     public async Task GetCoordinatesByCityName_MultipleItems_ReturnsCitiesThatMatchesTheRequest()
     {
         // Create a list of Coordinates objects
-        var cities = new List<Coordinates>
+        var cities = new List<City>
         {
-            new Coordinates
+            new City
                 { Latitude = 40.7128, Longitude = -74.0060, Name = "testCity", State = "test", Country = "test" },
-            new Coordinates
+            new City
                 { Latitude = 34.0522, Longitude = -118.2437, Name = "testCityAlpha", State = "test", Country = "test" },
-            new Coordinates
+            new City
                 { Latitude = 37.7749, Longitude = -122.4194, Name = "test", State = "test", Country = "test" }
         };
 
@@ -121,11 +122,11 @@ public class GeocodeApiServiceTest
     public async Task GetCoordinatesByCityName_ReturnedListDoesntContainTheCityName_ThrowsNotFoundException()
     {
         // Create a list of Coordinates objects without the requested city name
-        var cities = new List<Coordinates>
+        var cities = new List<City>
         {
-            new Coordinates
+            new City
                 { Latitude = 34.0522, Longitude = -118.2437, Name = "notMatched2", State = "test", Country = "test" },
-            new Coordinates
+            new City
                 { Latitude = 37.7749, Longitude = -122.4194, Name = "notMatched1", State = "test", Country = "test" }
         };
 

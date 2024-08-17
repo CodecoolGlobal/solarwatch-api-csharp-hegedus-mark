@@ -3,39 +3,33 @@ using System.Text.Json.Serialization;
 
 namespace SolarWatch.Models;
 
-public class Coordinates
+public class City
 {
     private const double TOLERANCE = 0.01;
-
-    [JsonPropertyName("lat")]
-    [JsonRequired]
+    
+    public int CityId { get; set; }
+    
     [Required]
     public double Latitude { get; init; }
-
-    [JsonPropertyName("lon")]
-    [JsonRequired]
+    
     [Required]
     public double Longitude { get; init; }
-
-    [JsonPropertyName("name")]
-    [JsonRequired]
+    
     [Required]
     public string Name { get; init; }
-
-    [JsonPropertyName("country")]
-    [JsonRequired]
+    
     [Required]
     public string Country { get; init; }
-
-    [JsonPropertyName("state")]
+    
     [Required]
-    [JsonRequired]
     public string State { get; init; }
-
+    
+    
+    public SunriseSunset SunriseSunset { get; set; }
 
     public override bool Equals(object obj)
     {
-        if (obj is Coordinates other)
+        if (obj is City other)
         {
             return Math.Abs(Latitude - other.Latitude) < TOLERANCE &&
                    Math.Abs(Longitude - other.Longitude) < TOLERANCE &&

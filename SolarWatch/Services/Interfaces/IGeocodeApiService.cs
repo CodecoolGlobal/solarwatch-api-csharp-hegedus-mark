@@ -4,5 +4,5 @@ namespace SolarWatch.Services;
 
 public interface IGeocodeApiService
 {
-    public Task<IEnumerable<Coordinates>> GetCoordinatesByCityName(string city);
+    public Task<IEnumerable<City>> GetCoordinatesByCityName(string city);
 }

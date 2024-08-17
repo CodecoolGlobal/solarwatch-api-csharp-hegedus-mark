@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using SolarWatch.Configuration;
+using SolarWatch.DTOs;
 using SolarWatch.Models;
 using SolarWatch.Services;
 
@@ -28,7 +29,7 @@ public class GeocodeApiServiceTests
         var apiConfig = new ApiServiceConfiguration { MaxRetries = 1, RetryDelayMilliseconds = 0 };
 
         var options = Options.Create(settings);
-        var apiService = new ApiService<Coordinates>(new HttpClient(), apiConfig);
+        var apiService = new ApiService(new HttpClient(), apiConfig);
 
         _geocodeApiService = new GeocodeApiService(apiService, options);
     }
