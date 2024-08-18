@@ -1,65 +1,65 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging; // Add this using directive
+using SolarWatch.Data.Models;
 using SolarWatch.Exceptions;
-using SolarWatch.Models;
 using SolarWatch.Services;
 
-namespace SolarWatch.Controllers;
-
-[Route("api/[controller]")]
-[ApiController]
-public class SunriseSunsetController : ControllerBase
+namespace SolarWatch.Controllers
 {
-    private readonly IGeocodeApiService _geocodeApiService;
-    private readonly ISunriseSunsetApiService _sunriseSunsetApiService;
-
-
-    public SunriseSunsetController(IGeocodeApiService geocodeApiService,
-        ISunriseSunsetApiService sunriseSunsetApiService)
+    [Route("api/[controller]")]
+    [ApiController]
+    public class SunriseSunsetController : ControllerBase
     {
-        _geocodeApiService = geocodeApiService;
-        _sunriseSunsetApiService = sunriseSunsetApiService;
-    }
+        private readonly ICityDataService _cityDataService;
+        private readonly ILogger<SunriseSunsetController> _logger; // Add this field
 
-    [HttpGet("{city}")]
-    public async Task<ActionResult<List<SunriseSunset>>> GetSunriseSunsetByCity(string city)
-    {
-        try
+        public SunriseSunsetController(ICityDataService cityDataService, ILogger<SunriseSunsetController> logger)
         {
-            var cities = new List<SunriseSunset>();
-            var coordinates = await _geocodeApiService.GetCoordinatesByCityName(city);
-            foreach (var coordinate in coordinates)
+            _cityDataService = cityDataService;
+            _logger = logger;
+        }
+
+        [HttpGet("{cityName}")]
+        public async Task<ActionResult<List<SunriseSunset>>> GetSunriseSunsetByCity(string cityName)
+        {
+            try
             {
-                var result = await _sunriseSunsetApiService.GetSunriseSunsetByCoordinates(coordinate);
-                if (result is null) continue;
-                cities.Add(result);
-            }
+                var results = await _cityDataService.GetCityData(cityName);
 
-            return Ok(cities);
-        }
-        catch (ClientException e)
-        {
-            Console.WriteLine(e);
-            return BadRequest(e.Message);
-        }
-        catch (NotFoundException e)
-        {
-            Console.WriteLine(e);
-            return NotFound(e.Message);
-        }
-        catch (ExternalApiException e)
-        {
-            Console.WriteLine(e);
-            return StatusCode(StatusCodes.Status502BadGateway, "Error communicating with the external API");
-        }
-        catch (InternalServerException e)
-        {
-            Console.WriteLine(e);
-            return StatusCode(StatusCodes.Status500InternalServerError, "An Error occured, please try again later.");
-        }
-        catch (Exception e)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError,
-                "An Unexpected error occured, please try again later.");
+                if (results.Count < 0)
+                {
+                    return NotFound();
+                }
+                
+                _logger.LogInformation($"Found {results.Count} sunrise sunsets");
+                
+                return Ok(results);
+            }
+            catch (ClientException e)
+            {
+                _logger.LogError(e, "ClientException occurred");
+                return BadRequest(e.Message);
+            }
+            catch (NotFoundException e)
+            {
+                _logger.LogError(e, "NotFoundException occurred");
+                return NotFound(e.Message);
+            }
+            catch (ExternalApiException e)
+            {
+                _logger.LogError(e, "ExternalApiException occurred");
+                return StatusCode(StatusCodes.Status502BadGateway, "Error communicating with the external API");
+            }
+            catch (InternalServerException e)
+            {
+                _logger.LogError(e, "InternalServerException occurred");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An Error occurred, please try again later.");
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "An unexpected error occurred");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An Unexpected error occurred, please try again later.");
+            }
         }
     }
 }

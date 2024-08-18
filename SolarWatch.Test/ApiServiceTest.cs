@@ -11,7 +11,7 @@ namespace SolarWatch.Test;
 
 public class Tests
 {
-    private IApiService<ApiTestResponse> _apiService;
+    private IApiService _apiService;
     private HttpClient _httpClient;
     private MockHttpMessageHandler _mockHttp;
     private ApiServiceConfiguration _configuration;
@@ -23,7 +23,7 @@ public class Tests
 
         _mockHttp = new MockHttpMessageHandler();
         _httpClient = _mockHttp.ToHttpClient();
-        _apiService = new ApiService<ApiTestResponse>(_httpClient, _configuration);
+        _apiService = new ApiService(_httpClient, _configuration);
     }
 
     [TearDown]

@@ -1,6 +1,6 @@
 namespace SolarWatch.Services;
 
-public interface IApiService<T>
+public interface IApiService
 {
     Task<string> GetAsync(string url);
 }

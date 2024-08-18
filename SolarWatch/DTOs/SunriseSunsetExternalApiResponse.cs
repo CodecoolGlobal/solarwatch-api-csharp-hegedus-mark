@@ -3,20 +3,20 @@ using System.Text.Json.Serialization;
 
 namespace SolarWatch.DTOs;
 
-public class SunriseSunsetApiResponse
+public class SunriseSunsetExternalApiResponse
 {
     [JsonPropertyName("results")]
-    [Required]
+    [JsonRequired]
     public SunriseSunsetResults Results { get; set; }
 }
 
 public class SunriseSunsetResults
 {
     [JsonPropertyName("sunrise")]
-    [Required]
+    [JsonRequired]
     public string Sunrise { get; set; }
 
     [JsonPropertyName("sunset")]
-    [Required]
+    [JsonRequired]
     public string Sunset { get; set; }
 }

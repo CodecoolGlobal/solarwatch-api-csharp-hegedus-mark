@@ -1,19 +1,20 @@
 using System.Text.Json;
 using Microsoft.Extensions.Options;
 using SolarWatch.Configuration;
+using SolarWatch.Data.Models;
+using SolarWatch.DTOs;
 using SolarWatch.Exceptions;
-using SolarWatch.Models;
 
 namespace SolarWatch.Services;
 
 public class GeocodeApiService : IGeocodeApiService
 {
     public const int LIMIT = 5;
-    private readonly IApiService<Coordinates> _apiService;
+    private readonly IApiService _apiService;
     private readonly string _geocodeBaseUrl;
     private readonly string _geocodeApiKey;
 
-    public GeocodeApiService(IApiService<Coordinates> apiService, IOptions<ExternalApiSettings> configuration)
+    public GeocodeApiService(IApiService apiService, IOptions<ExternalApiSettings> configuration)
     {
         _apiService = apiService;
         _geocodeBaseUrl = configuration.Value.GeocodeBaseUrl;
@@ -21,13 +22,13 @@ public class GeocodeApiService : IGeocodeApiService
     }
 
 
-    public async Task<IEnumerable<Coordinates>> GetCoordinatesByCityName(string city)
+    public async Task<IEnumerable<City>> GetCoordinatesByCityName(string city)
     {
         string url = $"{_geocodeBaseUrl}/direct?q={city}&limit={LIMIT}&appid={_geocodeApiKey}";
 
         var responseString = await _apiService.GetAsync(url);
 
-        var content = JsonSerializer.Deserialize<List<Coordinates>>(responseString);
+        var content = JsonSerializer.Deserialize<List<CoordinatesExternalApiResponse>>(responseString);
 
         if (content is null || content.Count == 0)
         {
@@ -42,6 +43,21 @@ public class GeocodeApiService : IGeocodeApiService
             throw new NotFoundException($"No matched Cities found for city: {city}");
         }
 
-        return matchedCities;
+        var mappedCities = matchedCities.Select(MapToCity).ToList();
+
+        return mappedCities;
+    }
+
+
+    private static City MapToCity(CoordinatesExternalApiResponse coordinatesExternal)
+    {
+        return new City
+        {
+            Name = coordinatesExternal.Name,
+            Country = coordinatesExternal.Country,
+            Latitude = coordinatesExternal.Latitude,
+            Longitude = coordinatesExternal.Longitude,
+            State = coordinatesExternal.State,
+        };
     }
 }
