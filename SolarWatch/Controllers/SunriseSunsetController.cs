@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging; // Add this using directive
 using SolarWatch.Data.Models;
@@ -11,7 +13,7 @@ namespace SolarWatch.Controllers
     public class SunriseSunsetController : ControllerBase
     {
         private readonly ICityDataService _cityDataService;
-        private readonly ILogger<SunriseSunsetController> _logger; // Add this field
+        private readonly ILogger<SunriseSunsetController> _logger; 
 
         public SunriseSunsetController(ICityDataService cityDataService, ILogger<SunriseSunsetController> logger)
         {
@@ -19,9 +21,10 @@ namespace SolarWatch.Controllers
             _logger = logger;
         }
 
-        [HttpGet("{cityName}")]
+        [HttpGet("{cityName}"), Authorize]
         public async Task<ActionResult<List<SunriseSunset>>> GetSunriseSunsetByCity(string cityName)
         {
+            Debug.WriteLine(this.HttpContext.User.Identity.Name);
             try
             {
                 var results = await _cityDataService.GetCityData(cityName);

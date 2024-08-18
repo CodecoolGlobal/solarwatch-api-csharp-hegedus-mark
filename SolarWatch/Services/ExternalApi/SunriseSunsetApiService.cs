@@ -2,7 +2,7 @@ using System.Text.Json;
 using Microsoft.Extensions.Options;
 using SolarWatch.Configuration;
 using SolarWatch.Data.Models;
-using SolarWatch.DTOs;
+using SolarWatch.RequestsAndResponses.External;
 
 namespace SolarWatch.Services;
 

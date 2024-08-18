@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using SolarWatch.Data.Models;
 using SolarWatch.Data.Repositories;
-using SolarWatch.DTOs;
+using SolarWatch.RequestsAndResponses;
 
 namespace SolarWatch.Services
 {

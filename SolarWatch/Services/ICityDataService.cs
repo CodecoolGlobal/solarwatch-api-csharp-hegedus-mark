@@ -1,4 +1,4 @@
-using SolarWatch.DTOs;
+using SolarWatch.RequestsAndResponses;
 
 namespace SolarWatch.Services;
 

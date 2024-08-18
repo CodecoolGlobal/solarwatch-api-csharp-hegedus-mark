@@ -1,9 +1,8 @@
-using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace SolarWatch.DTOs;
+namespace SolarWatch.RequestsAndResponses.External;
 
-public class CoordinatesExternalApiResponse
+public record CoordinatesExternalApiResponse
 {
     [JsonPropertyName("lat")]
     [JsonRequired]
