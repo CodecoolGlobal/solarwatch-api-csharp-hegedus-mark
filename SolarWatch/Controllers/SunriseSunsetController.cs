@@ -1,61 +1,65 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging; // Add this using directive
 using SolarWatch.Data.Models;
-using SolarWatch.DTOs;
 using SolarWatch.Exceptions;
 using SolarWatch.Services;
 
-namespace SolarWatch.Controllers;
-
-[Route("api/[controller]")]
-[ApiController]
-public class SunriseSunsetController : ControllerBase
+namespace SolarWatch.Controllers
 {
-    private readonly ICityDataService _cityDataService;
-
-
-    public SunriseSunsetController(ICityDataService cityDataService)
+    [Route("api/[controller]")]
+    [ApiController]
+    public class SunriseSunsetController : ControllerBase
     {
-        _cityDataService = cityDataService;
-    }
+        private readonly ICityDataService _cityDataService;
+        private readonly ILogger<SunriseSunsetController> _logger; // Add this field
 
-    [HttpGet("{cityName}")]
-    public async Task<ActionResult<List<SunriseSunset>>> GetSunriseSunsetByCity(string cityName)
-    {
-        try
+        public SunriseSunsetController(ICityDataService cityDataService, ILogger<SunriseSunsetController> logger)
         {
-            var results = await _cityDataService.GetCityData(cityName);
+            _cityDataService = cityDataService;
+            _logger = logger;
+        }
 
-            if (results.Count < 0)
+        [HttpGet("{cityName}")]
+        public async Task<ActionResult<List<SunriseSunset>>> GetSunriseSunsetByCity(string cityName)
+        {
+            try
             {
-                return NotFound();
+                var results = await _cityDataService.GetCityData(cityName);
+
+                if (results.Count < 0)
+                {
+                    return NotFound();
+                }
+                
+                _logger.LogInformation($"Found {results.Count} sunrise sunsets");
+                
+                return Ok(results);
             }
-            
-            return Ok(results);
-        }
-        catch (ClientException e)
-        {
-            Console.WriteLine(e);
-            return BadRequest(e.Message);
-        }
-        catch (NotFoundException e)
-        {
-            Console.WriteLine(e);
-            return NotFound(e.Message);
-        }
-        catch (ExternalApiException e)
-        {
-            Console.WriteLine(e);
-            return StatusCode(StatusCodes.Status502BadGateway, "Error communicating with the external API");
-        }
-        catch (InternalServerException e)
-        {
-            Console.WriteLine(e);
-            return StatusCode(StatusCodes.Status500InternalServerError, "An Error occured, please try again later.");
-        }
-        catch (Exception e)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError,
-                "An Unexpected error occured, please try again later.");
+            catch (ClientException e)
+            {
+                _logger.LogError(e, "ClientException occurred");
+                return BadRequest(e.Message);
+            }
+            catch (NotFoundException e)
+            {
+                _logger.LogError(e, "NotFoundException occurred");
+                return NotFound(e.Message);
+            }
+            catch (ExternalApiException e)
+            {
+                _logger.LogError(e, "ExternalApiException occurred");
+                return StatusCode(StatusCodes.Status502BadGateway, "Error communicating with the external API");
+            }
+            catch (InternalServerException e)
+            {
+                _logger.LogError(e, "InternalServerException occurred");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An Error occurred, please try again later.");
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "An unexpected error occurred");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An Unexpected error occurred, please try again later.");
+            }
         }
     }
 }

@@ -21,7 +21,7 @@ namespace SolarWatch.Migrations
                     Longitude = table.Column<double>(type: "float", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Country = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    State = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    State = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Sunrise = table.Column<TimeOnly>(type: "TIME", nullable: false),
                     Sunset = table.Column<TimeOnly>(type: "TIME", nullable: false)
                 },

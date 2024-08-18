@@ -12,8 +12,8 @@ using SolarWatch.Data;
 namespace SolarWatch.Migrations
 {
     [DbContext(typeof(SolarWatchDbContext))]
-    [Migration("20240817214437_MadeStateOptional")]
-    partial class MadeStateOptional
+    [Migration("20240817232219_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
