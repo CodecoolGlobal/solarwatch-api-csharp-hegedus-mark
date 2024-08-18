@@ -8,15 +8,15 @@ public class City
 
     public int CityId { get; set; }
 
-    [Required] public double Latitude { get; init; }
+    [Required] public double Latitude { get; set; }
 
-    [Required] public double Longitude { get; init; }
+    [Required] public double Longitude { get; set; }
 
-    [Required] public string Name { get; init; }
+    [Required] public string Name { get; set; }
 
-    [Required] public string Country { get; init; }
+    [Required] public string Country { get; set; }
 
-    public string? State { get; init; }
+    public string? State { get; set; }
 
     public SunriseSunset SunriseSunset { get; set; }
 

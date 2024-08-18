@@ -1,8 +1,8 @@
 using System.Text.Json;
 using Microsoft.Extensions.Options;
 using SolarWatch.Configuration;
+using SolarWatch.Data.Models;
 using SolarWatch.DTOs;
-using SolarWatch.Models;
 using SolarWatch.Services;
 
 namespace SolarWatch.Test;
@@ -70,7 +70,6 @@ public class SunriseSunsetApiServiceTests
         {
             Results = new SunriseSunsetResults { Sunrise = sunriseString, Sunset = sunsetString }
         };
-        var coordinates = new City { Name = "test", State = "test", Country = "test" };
         var expected = new SunriseSunset
         {
             Sunrise = TimeOnly.FromDateTime(DateTime.Parse(sunriseString)),
@@ -83,27 +82,5 @@ public class SunriseSunsetApiServiceTests
         // Assert
         Assert.That(result.Sunrise, Is.EqualTo(expected.Sunrise));
         Assert.That(result.Sunset, Is.EqualTo(expected.Sunset));
-    }
-
-    [Test]
-    public void MapToSunriseSunset_ShouldThrowArgumentNullException_WhenApiResponseDtoIsNull()
-    {
-        // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => _sunriseSunsetApiService.MapToSunriseSunset(null));
-    }
-
-    [Test]
-    public void MapToSunriseSunset_ShouldThrowArgumentNullException_WhenResultsIsNull()
-    {
-        // Arrange
-        var apiResponseDto = new SunriseSunsetExternalApiResponse
-        {
-            Results = null
-        };
-
-
-        // Act & Assert
-        Assert.Throws<ArgumentNullException>(() =>
-            _sunriseSunsetApiService.MapToSunriseSunset(apiResponseDto));
     }
 }

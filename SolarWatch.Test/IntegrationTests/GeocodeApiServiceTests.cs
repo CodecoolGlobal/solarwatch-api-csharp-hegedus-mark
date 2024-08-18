@@ -1,10 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using SolarWatch.Configuration;
-using SolarWatch.DTOs;
-using SolarWatch.Models;
 using SolarWatch.Services;
-
 namespace SolarWatch.Test.IntegrationTests;
 
 public class GeocodeApiServiceTests
