@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using SolarWatch.Data.Models;
 using SolarWatch.Data.Repositories;
-using SolarWatch.DTOs;
+using SolarWatch.RequestsAndResponses;
 
 namespace SolarWatch.Services
 {
@@ -24,7 +24,7 @@ namespace SolarWatch.Services
             _logger = logger;
         }
 
-        public async Task<List<CityWithSunriseSunsetResponse>> GetCityData(string cityName)
+        public async Task<List<CityWithSunriseSunset>> GetCityData(string cityName)
         {
             _logger.LogInformation("GetCityData called with cityName: {CityName}", cityName);
 
@@ -40,7 +40,7 @@ namespace SolarWatch.Services
             return await GetCitiesDataFromApi(cityName);
         }
 
-        private async Task<List<CityWithSunriseSunsetResponse>> GetCitiesDataFromApi(string cityName)
+        private async Task<List<CityWithSunriseSunset>> GetCitiesDataFromApi(string cityName)
         {
             _logger.LogInformation("GetCitiesDataFromApi called with cityName: {CityName}", cityName);
             var result = new List<City>();
@@ -81,10 +81,10 @@ namespace SolarWatch.Services
             return city;
         }
 
-        private List<CityWithSunriseSunsetResponse> MapMultipleCities(IEnumerable<City> cities)
+        private List<CityWithSunriseSunset> MapMultipleCities(IEnumerable<City> cities)
         {
             _logger.LogInformation("Mapping multiple cities to response DTOs");
-            var citiesWithSunriseSunset = new List<CityWithSunriseSunsetResponse>();
+            var citiesWithSunriseSunset = new List<CityWithSunriseSunset>();
 
             foreach (var city in cities)
             {
@@ -95,11 +95,11 @@ namespace SolarWatch.Services
             return citiesWithSunriseSunset;
         }
 
-        private CityWithSunriseSunsetResponse MapCityToCityWithSunriseSunsetResponse(City city)
+        private CityWithSunriseSunset MapCityToCityWithSunriseSunsetResponse(City city)
         {
-            return new CityWithSunriseSunsetResponse
+            return new CityWithSunriseSunset
             {
-                Name = city.Name,
+                CityName = city.Name,
                 Country = city.Country,
                 State = city.State,
                 Latitude = city.Latitude,

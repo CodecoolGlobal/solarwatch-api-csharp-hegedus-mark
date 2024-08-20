@@ -1,70 +1,196 @@
+using System.Text;
 using Microsoft.EntityFrameworkCore;
 using SolarWatch.Configuration;
 using SolarWatch.Data;
 using SolarWatch.Services;
 using dotenv.net;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Serilog;
+using SolarWatch.Controllers;
 using SolarWatch.Data.Repositories;
+using SolarWatch.Services.Authentication;
 
 
 DotEnv.Load();
+
 var builder = WebApplication.CreateBuilder(args);
+var configuration = builder.Configuration;
 
 
-builder.Logging.ClearProviders(); // Optionally clear default providers
-builder.Logging.AddConsole(); // Add console logging
-builder.Logging.AddDebug(); // Add debug logging
-
-// Set up Serilog
-Log.Logger = new LoggerConfiguration()
-    .WriteTo.Console()
-    .WriteTo.File("logs/myapp.txt", rollingInterval: RollingInterval.Day)
-    .CreateLogger();
-
-builder.Host.UseSerilog();
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-builder.Services.AddDbContext<SolarWatchDbContext>(options =>
-{
-    var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DbConnection");
-    options.UseSqlServer(connectionString);
-});
-builder.Services.Configure<ExternalApiSettings>(builder.Configuration.GetSection("ExternalApiSettings"));
-builder.Services.AddSingleton<HttpClient>();
-builder.Services.AddSingleton(new ApiServiceConfiguration
-{
-    MaxRetries = 3,
-    RetryDelayMilliseconds = 1000
-});
-builder.Services.AddTransient<IApiService, ApiService>();
-builder.Services.AddTransient<IGeocodeApiService, GeocodeApiService>();
-builder.Services.AddTransient<ISunriseSunsetApiService, SunriseSunsetApiService>();
-builder.Services.AddTransient<ICityRepository, CityRepository>();
-builder.Services.AddTransient<ICityDataService, CityDataService>();
-
+// Configure services and other settings
+ConfigureSettings();
+ConfigureLogging();
+AddServices();
+ConfigureSwagger();
+AddDbContexts();
+AddAuthentication();
+AddIdentity();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-    app.UseDeveloperExceptionPage();
-}
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
+// Configure the HTTP request pipeline
+AddRoles();
+ConfigureApp();
 
 app.Run();
 
-public partial class Program
+Log.CloseAndFlush();
+
+return;
+
+
+void ConfigureSettings()
 {
+    builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+    builder.Services.Configure<ExternalApiSettings>(builder.Configuration.GetSection("ExternalApiSettings"));
+    builder.Services.Configure<RoleSettings>(builder.Configuration.GetSection("RoleSettings"));
+}
+
+// Configuration Methods
+void ConfigureLogging()
+{
+    builder.Logging.ClearProviders();
+    builder.Logging.AddConsole();
+    builder.Logging.AddDebug();
+
+    // Set up Serilog
+    Log.Logger = new LoggerConfiguration()
+        .Enrich.FromLogContext()
+        .WriteTo.Console()
+        .CreateLogger();
+
+    builder.Host.UseSerilog();
+}
+
+void AddServices()
+{
+    builder.Services.AddControllers();
+
+    builder.Services.AddSingleton<HttpClient>();
+    builder.Services.AddSingleton(new ApiServiceConfiguration
+    {
+        MaxRetries = 3,
+        RetryDelayMilliseconds = 1000
+    });
+    builder.Services.AddTransient<IApiService, ApiService>();
+    builder.Services.AddTransient<IGeocodeApiService, GeocodeApiService>();
+    builder.Services.AddTransient<ISunriseSunsetApiService, SunriseSunsetApiService>();
+    builder.Services.AddTransient<ICityRepository, CityRepository>();
+    builder.Services.AddTransient<ICityDataService, CityDataService>();
+    builder.Services.AddScoped<IAuthService, AuthService>();
+    builder.Services.AddScoped<ITokenService, TokenService>();
+    builder.Services.AddScoped<AuthenticationSeeder>();
+}
+
+void ConfigureSwagger()
+{
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen(option =>
+    {
+        option.SwaggerDoc("v1", new OpenApiInfo { Title = "SolarWatch API", Version = "v1" });
+        option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+        {
+            In = ParameterLocation.Header,
+            Description = "JWT Authorization header using the Bearer scheme.",
+            Name = "Authorization",
+            Type = SecuritySchemeType.Http,
+            BearerFormat = "JWT",
+            Scheme = "bearer",
+        });
+        option.AddSecurityRequirement(new OpenApiSecurityRequirement
+        {
+            {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                },
+                []
+            }
+        });
+    });
+}
+
+void AddDbContexts()
+{
+    builder.Services.AddDbContext<SolarWatchDbContext>(options =>
+    {
+        options.UseSqlServer(Environment.GetEnvironmentVariable("ConnectionStrings__DbConnection"));
+    });
+
+    builder.Services.AddDbContext<UsersContext>(options =>
+    {
+        options.UseSqlServer(Environment.GetEnvironmentVariable("ConnectionStrings__DbConnection"));
+    });
+}
+
+void AddAuthentication()
+{
+    
+    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ClockSkew = TimeSpan.Zero,
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = configuration["JwtSettings:Issuer"],
+                ValidAudience = configuration["JwtSettings:Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(configuration["JwtSettings:SecretKey"] ?? throw new InvalidOperationException())
+                ),
+            };
+        });
+}
+
+void AddIdentity()
+{
+    builder.Services.AddIdentityCore<IdentityUser>(options =>
+        {
+            options.SignIn.RequireConfirmedAccount = false;
+            options.User.RequireUniqueEmail = true;
+            options.Password.RequireDigit = false;
+            options.Password.RequiredLength = 6;
+            options.Password.RequireNonAlphanumeric = false;
+            options.Password.RequireUppercase = false;
+            options.Password.RequireLowercase = false;
+        })
+        .AddRoles<IdentityRole>()
+        .AddEntityFrameworkStores<UsersContext>();
+}
+
+void ConfigureApp()
+{
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+        app.UseDeveloperExceptionPage();
+        Log.Information("Running ASP.NET Core Web API in Development mode");
+        Log.Information(configuration["JwtSettings:SecretKey"]);
+    }
+
+    app.UseHttpsRedirection();
+    app.UseAuthentication();
+    app.UseAuthorization();
+    app.MapControllers();
+}
+
+
+void AddRoles()
+{
+    using var scope = app.Services.CreateScope();
+    
+    var authenticationSeeder = scope.ServiceProvider.GetRequiredService<AuthenticationSeeder>();
+    authenticationSeeder.AddRoles();
+    authenticationSeeder.AddAdmin();
 }

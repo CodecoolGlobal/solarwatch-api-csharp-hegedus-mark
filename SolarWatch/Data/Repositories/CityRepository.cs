@@ -34,6 +34,14 @@ namespace SolarWatch.Data.Repositories
             return cities;
         }
 
+        public City? GetById(int id)
+        {
+            _logger.LogInformation("Getting cities with id: {CityId}", id);
+            var city = _dbContext.Cities.FirstOrDefault(c => c.CityId == id);
+            _logger.LogInformation("Retrieved city with id: {CityId}", city.CityId);
+            return city;
+        }
+
         public void Add(City city)
         {
             _logger.LogInformation("Adding city: {CityName}", city.Name);

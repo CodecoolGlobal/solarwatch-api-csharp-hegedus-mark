@@ -1,16 +1,15 @@
-using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace SolarWatch.DTOs;
+namespace SolarWatch.RequestsAndResponses.External;
 
-public class SunriseSunsetExternalApiResponse
+public record SunriseSunsetExternalApiResponse
 {
     [JsonPropertyName("results")]
     [JsonRequired]
     public SunriseSunsetResults Results { get; set; }
 }
 
-public class SunriseSunsetResults
+public record SunriseSunsetResults
 {
     [JsonPropertyName("sunrise")]
     [JsonRequired]
