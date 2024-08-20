@@ -192,4 +192,5 @@ void AddRoles()
     
     var authenticationSeeder = scope.ServiceProvider.GetRequiredService<AuthenticationSeeder>();
     authenticationSeeder.AddRoles();
+    authenticationSeeder.AddAdmin();
 }
