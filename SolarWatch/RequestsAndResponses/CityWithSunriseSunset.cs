@@ -2,9 +2,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SolarWatch.RequestsAndResponses;
 
-public record CityWithSunriseSunsetResponse
+public record CityWithSunriseSunset
 {
-    [Required] public string Name { get; set; }
+    [Required] public string CityName { get; set; }
 
     [Required] public string Country { get; set; }
 

@@ -1,72 +1,168 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using SolarWatch.Configuration; // Add this using directive
 using SolarWatch.Data.Models;
+using SolarWatch.Data.Repositories;
 using SolarWatch.Exceptions;
+using SolarWatch.RequestsAndResponses;
 using SolarWatch.Services;
 
-namespace SolarWatch.Controllers
-{
-    [Route("api/[controller]")]
-    [ApiController]
-    public class SunriseSunsetController : ControllerBase
-    {
-        private readonly ICityDataService _cityDataService;
-        private readonly ILogger<SunriseSunsetController> _logger;
+namespace SolarWatch.Controllers;
 
-        public SunriseSunsetController(ICityDataService cityDataService, ILogger<SunriseSunsetController> logger)
+[Route("api/[controller]")]
+[ApiController]
+public class SunriseSunsetController : ControllerBase
+{
+    private readonly ICityDataService _cityDataService;
+    private readonly ICityRepository _cityRepository;
+    private readonly ILogger<SunriseSunsetController> _logger;
+
+    public SunriseSunsetController(ICityDataService cityDataService, ILogger<SunriseSunsetController> logger,
+        ICityRepository cityRepository)
+    {
+        _cityDataService = cityDataService;
+        _logger = logger;
+        _cityRepository = cityRepository;
+    }
+
+    [HttpGet("{cityName}"), Authorize(Roles = "User, Admin")]
+    public async Task<ActionResult<List<SunriseSunset>>> GetSunriseSunsetByCity(string cityName)
+    {
+        Debug.WriteLine(this.HttpContext.User.Identity.Name);
+        try
         {
-            _cityDataService = cityDataService;
-            _logger = logger;
+            var results = await _cityDataService.GetCityData(cityName);
+
+            if (results.Count < 0)
+            {
+                return NotFound();
+            }
+
+            _logger.LogInformation($"Found {results.Count} sunrise sunsets");
+
+            return Ok(results);
+        }
+        catch (ClientException e)
+        {
+            _logger.LogError(e, "ClientException occurred");
+            return BadRequest(e.Message);
+        }
+        catch (NotFoundException e)
+        {
+            _logger.LogError(e, "NotFoundException occurred");
+            return NotFound(e.Message);
+        }
+        catch (ExternalApiException e)
+        {
+            _logger.LogError(e, "ExternalApiException occurred");
+            return StatusCode(StatusCodes.Status502BadGateway, "Error communicating with the external API");
+        }
+        catch (InternalServerException e)
+        {
+            _logger.LogError(e, "InternalServerException occurred");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                "An Error occurred, please try again later.");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "An unexpected error occurred");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                "An Unexpected error occurred, please try again later.");
+        }
+    }
+
+    [HttpPost, Authorize(Roles = "Admin")]
+    public IActionResult Post([FromBody] CityWithSunriseSunset cityWithSunriseSunset)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
         }
 
-        [HttpGet("{cityName}"), Authorize(Roles = "User, Admin")]
-        public async Task<ActionResult<List<SunriseSunset>>> GetSunriseSunsetByCity(string cityName)
+        try
         {
-            Debug.WriteLine(this.HttpContext.User.Identity.Name);
-            try
+            var cityModel = new City
             {
-                var results = await _cityDataService.GetCityData(cityName);
-
-                if (results.Count < 0)
+                Country = cityWithSunriseSunset.Country,
+                Latitude = cityWithSunriseSunset.Latitude,
+                Longitude = cityWithSunriseSunset.Longitude,
+                Name = cityWithSunriseSunset.CityName,
+                State = cityWithSunriseSunset.State,
+                SunriseSunset = new SunriseSunset
                 {
-                    return NotFound();
+                    Sunrise = cityWithSunriseSunset.Sunrise,
+                    Sunset = cityWithSunriseSunset.Sunset
                 }
+            };
 
-                _logger.LogInformation($"Found {results.Count} sunrise sunsets");
+            _cityRepository.Add(cityModel);
+            return CreatedAtAction(nameof(Post), cityModel);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "An unexpected error occurred");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                "An unexpected error occurred, please try again later.");
+        }
+    }
 
-                return Ok(results);
-            }
-            catch (ClientException e)
+    [HttpPut("{id:int}"), Authorize(Roles = "Admin")]
+    public IActionResult Update([FromBody] CityWithSunriseSunset cityWithSunriseSunset, int id)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        try
+        {
+            var city = _cityRepository.GetById(id);
+            if (city == null)
             {
-                _logger.LogError(e, "ClientException occurred");
-                return BadRequest(e.Message);
+                return NotFound();
             }
-            catch (NotFoundException e)
+
+            city.Country = cityWithSunriseSunset.Country;
+            city.Latitude = cityWithSunriseSunset.Latitude;
+            city.Longitude = cityWithSunriseSunset.Longitude;
+            city.Name = cityWithSunriseSunset.CityName;
+            city.State = cityWithSunriseSunset.State;
+            city.SunriseSunset = new SunriseSunset
             {
-                _logger.LogError(e, "NotFoundException occurred");
-                return NotFound(e.Message);
-            }
-            catch (ExternalApiException e)
+                Sunset = cityWithSunriseSunset.Sunset,
+                Sunrise = cityWithSunriseSunset.Sunrise
+            };
+
+            _cityRepository.Update(city);
+            return NoContent();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "An unexpected error occurred");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                "An unexpected error occurred, please try again later.");
+        }
+    }
+
+    [HttpDelete("{id:int}"), Authorize(Roles = "Admin")]
+    public IActionResult Delete(int id)
+    {
+        try
+        {
+            var city = _cityRepository.GetById(id);
+            if (city == null)
             {
-                _logger.LogError(e, "ExternalApiException occurred");
-                return StatusCode(StatusCodes.Status502BadGateway, "Error communicating with the external API");
+                return NotFound();
             }
-            catch (InternalServerException e)
-            {
-                _logger.LogError(e, "InternalServerException occurred");
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    "An Error occurred, please try again later.");
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "An unexpected error occurred");
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    "An Unexpected error occurred, please try again later.");
-            }
+
+            _cityRepository.Delete(city);
+            return NoContent();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "An unexpected error occurred");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                "An unexpected error occurred, please try again later.");
         }
     }
 }
