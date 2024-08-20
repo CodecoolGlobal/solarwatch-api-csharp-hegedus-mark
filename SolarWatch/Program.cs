@@ -32,6 +32,7 @@ AddIdentity();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
+AddRoles();
 ConfigureApp();
 
 app.Run();
@@ -45,6 +46,7 @@ void ConfigureSettings()
 {
     builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
     builder.Services.Configure<ExternalApiSettings>(builder.Configuration.GetSection("ExternalApiSettings"));
+    builder.Services.Configure<RoleSettings>(builder.Configuration.GetSection("RoleSettings"));
 }
 
 // Configuration Methods
@@ -80,6 +82,7 @@ void AddServices()
     builder.Services.AddTransient<ICityDataService, CityDataService>();
     builder.Services.AddScoped<IAuthService, AuthService>();
     builder.Services.AddScoped<ITokenService, TokenService>();
+    builder.Services.AddScoped<AuthenticationSeeder>();
 }
 
 void ConfigureSwagger()
@@ -161,6 +164,7 @@ void AddIdentity()
             options.Password.RequireUppercase = false;
             options.Password.RequireLowercase = false;
         })
+        .AddRoles<IdentityRole>()
         .AddEntityFrameworkStores<UsersContext>();
 }
 
@@ -179,4 +183,13 @@ void ConfigureApp()
     app.UseAuthentication();
     app.UseAuthorization();
     app.MapControllers();
+}
+
+
+void AddRoles()
+{
+    using var scope = app.Services.CreateScope();
+    
+    var authenticationSeeder = scope.ServiceProvider.GetRequiredService<AuthenticationSeeder>();
+    authenticationSeeder.AddRoles();
 }

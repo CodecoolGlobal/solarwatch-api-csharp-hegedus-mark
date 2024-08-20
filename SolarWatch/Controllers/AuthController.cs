@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using SolarWatch.Configuration;
 using SolarWatch.RequestsAndResponses.Auth;
 using SolarWatch.Services.Authentication;
 
@@ -16,14 +18,16 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("Register")]
-    public async Task<ActionResult<RegistrationResponse>> Register(RegistrationRequest request)
+    public async Task<ActionResult<RegistrationResponse>> Register(RegistrationRequest request,
+        IOptions<RoleSettings> roleSettings)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
 
-        var result = await _authService.RegisterAsync(request.Email, request.Username, request.Password);
+        var result = await _authService.RegisterAsync(request.Email, request.Username, request.Password,
+            roleSettings.Value.UserRoleName);
 
         if (!result.Success)
         {
