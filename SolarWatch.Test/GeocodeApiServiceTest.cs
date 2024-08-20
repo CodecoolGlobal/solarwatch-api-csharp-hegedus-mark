@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Options;
 using SolarWatch.Configuration;
 using SolarWatch.Data.Models;
-using SolarWatch.DTOs;
 using SolarWatch.Exceptions;
+using SolarWatch.RequestsAndResponses.External;
 using SolarWatch.Services;
 using JsonException = System.Text.Json.JsonException;
 using JsonSerializer = System.Text.Json.JsonSerializer;

@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using SolarWatch.Controllers;
 using SolarWatch.Data.Repositories;
 using SolarWatch.Services.Authentication;
 
@@ -16,8 +17,11 @@ using SolarWatch.Services.Authentication;
 DotEnv.Load();
 
 var builder = WebApplication.CreateBuilder(args);
+var configuration = builder.Configuration;
+
 
 // Configure services and other settings
+ConfigureSettings();
 ConfigureLogging();
 AddServices();
 ConfigureSwagger();
@@ -32,6 +36,16 @@ ConfigureApp();
 
 app.Run();
 
+Log.CloseAndFlush();
+
+return;
+
+
+void ConfigureSettings()
+{
+    builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+    builder.Services.Configure<ExternalApiSettings>(builder.Configuration.GetSection("ExternalApiSettings"));
+}
 
 // Configuration Methods
 void ConfigureLogging()
@@ -42,8 +56,8 @@ void ConfigureLogging()
 
     // Set up Serilog
     Log.Logger = new LoggerConfiguration()
+        .Enrich.FromLogContext()
         .WriteTo.Console()
-        .WriteTo.File("logs/myapp.txt", rollingInterval: RollingInterval.Day)
         .CreateLogger();
 
     builder.Host.UseSerilog();
@@ -115,6 +129,7 @@ void AddDbContexts()
 
 void AddAuthentication()
 {
+    
     builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(options =>
         {
@@ -125,11 +140,10 @@ void AddAuthentication()
                 ValidateAudience = true,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                ValidIssuer = "apiWithAuthBackend",
-                ValidAudience = "apiWithAuthBackend",
+                ValidIssuer = configuration["JwtSettings:Issuer"],
+                ValidAudience = configuration["JwtSettings:Audience"],
                 IssuerSigningKey = new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_SECRET_KEY") ??
-                                           throw new InvalidOperationException("JWT_SECRET_KEY not found!"))
+                    Encoding.UTF8.GetBytes(configuration["JwtSettings:SecretKey"] ?? throw new InvalidOperationException())
                 ),
             };
         });
@@ -157,14 +171,12 @@ void ConfigureApp()
         app.UseSwagger();
         app.UseSwaggerUI();
         app.UseDeveloperExceptionPage();
+        Log.Information("Running ASP.NET Core Web API in Development mode");
+        Log.Information(configuration["JwtSettings:SecretKey"]);
     }
 
     app.UseHttpsRedirection();
     app.UseAuthentication();
     app.UseAuthorization();
     app.MapControllers();
-}
-
-public partial class Program
-{
 }

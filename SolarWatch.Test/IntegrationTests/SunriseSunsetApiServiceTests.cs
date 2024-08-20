@@ -2,7 +2,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using SolarWatch.Configuration;
 using SolarWatch.Data.Models;
-using SolarWatch.DTOs;
 using SolarWatch.Services;
 
 namespace SolarWatch.Test.IntegrationTests;

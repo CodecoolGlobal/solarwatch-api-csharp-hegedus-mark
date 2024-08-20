@@ -3,12 +3,21 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using SolarWatch.Controllers;
 
 namespace SolarWatch.Services.Authentication;
 
 public class TokenService : ITokenService
 {
+    private readonly IOptions<JwtSettings> _jwtSettings;
+
+    public TokenService(IOptions<JwtSettings> jwtSettings)
+    {
+        _jwtSettings = jwtSettings;
+    }
+
     private const int ExpirationMinutes = 30;
 
     public string CreateToken(IdentityUser user)
@@ -27,7 +36,7 @@ public class TokenService : ITokenService
     }
 
     private JwtSecurityToken CreateJwtToken(List<Claim> claims, SigningCredentials signingCredentials,
-        DateTime expiration) => new("apiWithAuthBackend", "apiWithAuthBackend",
+        DateTime expiration) => new(_jwtSettings.Value.Issuer, _jwtSettings.Value.Audience,
         claims,
         expires: expiration,
         signingCredentials: signingCredentials);
@@ -61,8 +70,7 @@ public class TokenService : ITokenService
     {
         return new SigningCredentials(
             new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_SECRET_KEY") ?? throw new
-                    InvalidOperationException())
+                Encoding.UTF8.GetBytes(_jwtSettings.Value.SecretKey)
             ), SecurityAlgorithms.HmacSha256
         );
     }
