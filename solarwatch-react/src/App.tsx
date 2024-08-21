@@ -1,35 +1,44 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import {createBrowserRouter, RouterProvider, Navigate} from 'react-router-dom';
 import './App.css'
+import {AuthProvider, useAuth} from "./contexts/AuthContext.tsx";
+
+import {Home, Login, AdminDashboard, Main} from "./pages";
+
+
+const ProtectedRoute = ({children}) => {
+    const {authInfo} = useAuth();
+    return authInfo.authenticated ? children : <Navigate to="/login"/>
+}
+
+const AdminRoute = ({children}) => {
+    const {authInfo} = useAuth();
+    return authInfo.authenticated && authInfo.userRole === "admin" ? children : <Navigate to="/login"/>
+}
+
+const router = createBrowserRouter([
+    {
+        path: "/",
+        element: <Home/>
+    },
+    {
+        path: "/login",
+        element: <Login/>
+    },
+    {
+        path: "/admin",
+        element: <AdminRoute><AdminDashboard/></AdminRoute>
+    },
+    {
+        path: "/main",
+        element: <ProtectedRoute><Main/></ProtectedRoute>
+    },
+]);
 
 function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    return (
+        <AuthProvider>
+            <RouterProvider router={router}/>
+        </AuthProvider>)
 }
 
 export default App
