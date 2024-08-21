@@ -1,8 +1,8 @@
 import {createContext, ReactNode, useContext, useState} from "react";
 import {ILoginDetails} from "../types.ts";
 import {clearAccessToken, setAccessToken} from "../utils/accessTokenUtils.ts";
-import {fetcher} from "../utils/fetcher.ts";
 import {getUserRole} from "../utils/jwtHelpers.ts";
+import {fetchLogin} from "../utils/endpointHelpers.ts";
 
 type Props = {
     children?: ReactNode;
@@ -15,7 +15,7 @@ type AuthInfo = {
 
 type IAuthContext = {
     authInfo: AuthInfo;
-     login: (loginDetails: ILoginDetails) => Promise<void>;
+    login: (loginDetails: ILoginDetails) => Promise<void>;
     logout: () => void;
     error: string | null;
 }
@@ -41,13 +41,8 @@ export const AuthProvider = ({children}: Props) => {
 
     const login = async (loginDetails: ILoginDetails) => {
 
-        const options: RequestInit = {
-            method: "POST",
-            body: JSON.stringify(loginDetails),
-        }
-
         try {
-            const result = await fetcher('LOGIN', options);
+            const result = await fetchLogin(loginDetails);
 
             setAccessToken(result.token);
             setAuthInfo({

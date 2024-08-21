@@ -2,10 +2,12 @@
 import React, {useState} from 'react';
 import {useAuth} from '../contexts/AuthContext.tsx';
 import {ILoginDetails} from '../types.ts';
+import {useNavigate} from "react-router-dom";
 
 export const Login = () => {
-    const {login, error} = useAuth();
+    const {login, error, authInfo} = useAuth();
     const [loginDetails, setLoginDetails] = useState<ILoginDetails>({email: '', password: ''});
+    const navigate = useNavigate();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setLoginDetails({
@@ -17,6 +19,10 @@ export const Login = () => {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         await login(loginDetails);
+
+        if (authInfo.authenticated) {
+            navigate('/main');
+        }
     };
 
     return (

@@ -1,9 +1,8 @@
-import {API_ENDPOINTS} from "../../config.ts";
 import {getAccessToken} from "./accessTokenUtils.ts";
 
-export const fetcher = async (endpoint: keyof typeof API_ENDPOINTS, options: RequestInit = {}) => {
 
-    const url = API_ENDPOINTS[endpoint];
+export const fetcher = async (url: string, options: RequestInit = {}) => {
+
     // Set up default headers or other common options
     const defaultHeaders: HeadersInit = {
         'Content-Type': 'application/json',
