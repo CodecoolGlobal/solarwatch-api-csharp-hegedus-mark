@@ -6,6 +6,7 @@ using SolarWatch.Services;
 using dotenv.net;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -28,6 +29,11 @@ ConfigureSwagger();
 AddDbContexts();
 AddAuthentication();
 AddIdentity();
+
+if (builder.Environment.IsDevelopment())
+{
+    AddCors();
+}
 
 var app = builder.Build();
 
@@ -132,7 +138,6 @@ void AddDbContexts()
 
 void AddAuthentication()
 {
-    
     builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(options =>
         {
@@ -146,7 +151,8 @@ void AddAuthentication()
                 ValidIssuer = configuration["JwtSettings:Issuer"],
                 ValidAudience = configuration["JwtSettings:Audience"],
                 IssuerSigningKey = new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(configuration["JwtSettings:SecretKey"] ?? throw new InvalidOperationException())
+                    Encoding.UTF8.GetBytes(configuration["JwtSettings:SecretKey"] ??
+                                           throw new InvalidOperationException())
                 ),
             };
         });
@@ -168,6 +174,21 @@ void AddIdentity()
         .AddEntityFrameworkStores<UsersContext>();
 }
 
+void AddCors()
+{
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("AllowSpecificOrigin"
+            , policyBuilder =>
+            {
+                policyBuilder.WithOrigins(configuration["AllowedOrigin"] ?? throw new InvalidOperationException())
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+            });
+    });
+}
+
 void ConfigureApp()
 {
     if (app.Environment.IsDevelopment())
@@ -175,8 +196,18 @@ void ConfigureApp()
         app.UseSwagger();
         app.UseSwaggerUI();
         app.UseDeveloperExceptionPage();
+        app.UseCors("AllowSpecificOrigin");
         Log.Information("Running ASP.NET Core Web API in Development mode");
         Log.Information(configuration["JwtSettings:SecretKey"]);
+        
+        
+        using var scope = app.Services.CreateScope();
+        var services = scope.ServiceProvider;
+        
+        var roleSettings = services.GetRequiredService<IOptions<RoleSettings>>().Value;
+
+        Log.Information($"AdminRole: {roleSettings.AdminRoleName}");
+        Log.Information($"UserRole: {roleSettings.UserRoleName}");
     }
 
     app.UseHttpsRedirection();
@@ -189,8 +220,10 @@ void ConfigureApp()
 void AddRoles()
 {
     using var scope = app.Services.CreateScope();
-    
+
     var authenticationSeeder = scope.ServiceProvider.GetRequiredService<AuthenticationSeeder>();
     authenticationSeeder.AddRoles();
     authenticationSeeder.AddAdmin();
 }
+
+public partial class Program { }

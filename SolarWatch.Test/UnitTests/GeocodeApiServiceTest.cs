@@ -1,13 +1,12 @@
 using Microsoft.Extensions.Options;
 using SolarWatch.Configuration;
-using SolarWatch.Data.Models;
 using SolarWatch.Exceptions;
 using SolarWatch.RequestsAndResponses.External;
 using SolarWatch.Services;
 using JsonException = System.Text.Json.JsonException;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
-namespace SolarWatch.Test;
+namespace SolarWatch.Test.UnitTests;
 
 public class GeocodeApiServiceTest
 {

@@ -1,11 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using SolarWatch.Data;
 using SolarWatch.Data.Models;
 using SolarWatch.Data.Repositories;
-using SolarWatch.Data;
 
-namespace SolarWatch.Test
+namespace SolarWatch.Test.UnitTests
 {
+
     public class CityRepositoryTests
     {
         private SolarWatchDbContext _dbContext;

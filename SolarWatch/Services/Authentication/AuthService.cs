@@ -25,7 +25,11 @@ public class AuthService : IAuthService
         }
         
         await _userManager.AddToRoleAsync(user, role);
-        return new AuthResult(true, email, username, "");
+        
+        var roles = await _userManager.GetRolesAsync(user);
+        var accessToken = _tokenService.CreateToken(user, roles[0]);
+        
+        return new AuthResult(true, email, username, accessToken);
     }
 
     public async Task<AuthResult> LoginAsync(string email, string password)

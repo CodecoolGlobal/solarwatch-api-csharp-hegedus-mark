@@ -18,8 +18,7 @@ services:
       - .env
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
-      - ConnectionStrings__DbConnection=Server=db;Database=SolarWatch;User Id=sa;Password=yourStrong(!)Password;Encrypt=false;
+      - ConnectionStrings__DbConnection= myConnectionString
     depends_on:
       - db
         

@@ -3,7 +3,8 @@ using SolarWatch.Data.Models;
 using SolarWatch.Data.Repositories;
 using SolarWatch.Services;
 
-namespace SolarWatch.Test;
+namespace SolarWatch.Test.UnitTests;
+
 
 public class CityDataServiceTests
 {
@@ -43,7 +44,7 @@ public class CityDataServiceTests
 
         //Assert
         Assert.That(result, Has.Count.EqualTo(1));
-        Assert.That(result[0].Name, Is.EqualTo(cityName));
+        Assert.That(result[0].CityName, Is.EqualTo(cityName));
     }
 
     [Test]
@@ -76,7 +77,7 @@ public class CityDataServiceTests
 
         // Assert
         Assert.That(result, Has.Count.EqualTo(1));
-        Assert.That(result[0].Name, Is.EqualTo(cityName));
+        Assert.That(result[0].CityName, Is.EqualTo(cityName));
         Assert.That(result[0].Country, Is.EqualTo("API_Test"));
         _cityRepository.Received(1).Add(Arg.Any<City>());
     }
