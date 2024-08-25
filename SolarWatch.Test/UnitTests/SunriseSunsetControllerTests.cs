@@ -1,11 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Testing;
-using NSubstitute.ExceptionExtensions;
 using SolarWatch.Controllers;
-using SolarWatch.Exceptions;
 using SolarWatch.Services;
 
-namespace SolarWatch.Test;
+namespace SolarWatch.Test.UnitTests;
 
 public class SunriseSunsetControllerTests
 {

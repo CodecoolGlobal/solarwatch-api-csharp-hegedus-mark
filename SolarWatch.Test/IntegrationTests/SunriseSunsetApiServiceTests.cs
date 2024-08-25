@@ -6,6 +6,7 @@ using SolarWatch.Services;
 
 namespace SolarWatch.Test.IntegrationTests;
 
+[Category("IntegrationTests")]
 public class SunriseSunsetApiServiceTests
 {
     private SunriseSunsetApiService _sunriseSunsetApiService;
@@ -15,7 +16,7 @@ public class SunriseSunsetApiServiceTests
     {
         // Set up the configuration to use user-secrets
         var configuration = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.Test.json", optional: false, reloadOnChange: true)
+            .AddJsonFile("appsettings.Development.json", optional: false, reloadOnChange: true)
             .Build();
 
         var settings = new ExternalApiSettings

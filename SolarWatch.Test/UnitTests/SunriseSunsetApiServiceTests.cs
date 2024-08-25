@@ -5,7 +5,7 @@ using SolarWatch.Data.Models;
 using SolarWatch.RequestsAndResponses.External;
 using SolarWatch.Services;
 
-namespace SolarWatch.Test;
+namespace SolarWatch.Test.UnitTests;
 
 public class SunriseSunsetApiServiceTests
 {

@@ -6,6 +6,7 @@ using SolarWatch.Services;
 using dotenv.net;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -198,6 +199,15 @@ void ConfigureApp()
         app.UseCors("AllowSpecificOrigin");
         Log.Information("Running ASP.NET Core Web API in Development mode");
         Log.Information(configuration["JwtSettings:SecretKey"]);
+        
+        
+        using var scope = app.Services.CreateScope();
+        var services = scope.ServiceProvider;
+        
+        var roleSettings = services.GetRequiredService<IOptions<RoleSettings>>().Value;
+
+        Log.Information($"AdminRole: {roleSettings.AdminRoleName}");
+        Log.Information($"UserRole: {roleSettings.UserRoleName}");
     }
 
     app.UseHttpsRedirection();

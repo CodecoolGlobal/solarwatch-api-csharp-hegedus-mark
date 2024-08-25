@@ -3,7 +3,8 @@ using SolarWatch.Data.Models;
 using SolarWatch.Data.Repositories;
 using SolarWatch.Services;
 
-namespace SolarWatch.Test;
+namespace SolarWatch.Test.UnitTests;
+
 
 public class CityDataServiceTests
 {

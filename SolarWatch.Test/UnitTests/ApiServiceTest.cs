@@ -1,5 +1,4 @@
 using System.Net;
-using System.Text;
 using System.Text.Json;
 using RichardSzalay.MockHttp;
 using SolarWatch.Configuration;
@@ -7,9 +6,10 @@ using SolarWatch.Exceptions;
 using SolarWatch.Services;
 using SolarWatch.Test.TestHelpers;
 
-namespace SolarWatch.Test;
+namespace SolarWatch.Test.UnitTests;
 
-public class Tests
+
+public class ApiServiceTests
 {
     private IApiService _apiService;
     private HttpClient _httpClient;

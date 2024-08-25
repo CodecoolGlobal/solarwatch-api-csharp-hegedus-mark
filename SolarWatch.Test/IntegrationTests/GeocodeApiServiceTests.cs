@@ -4,6 +4,7 @@ using SolarWatch.Configuration;
 using SolarWatch.Services;
 namespace SolarWatch.Test.IntegrationTests;
 
+[Category("IntegrationTests")]
 public class GeocodeApiServiceTests
 {
     private GeocodeApiService _geocodeApiService;
@@ -13,7 +14,7 @@ public class GeocodeApiServiceTests
     {
         // Set up the configuration to use user-secrets
         var configuration = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.Test.json", optional: false, reloadOnChange: true)
+            .AddJsonFile("appsettings.Development.json", optional: false, reloadOnChange: true)
             .AddUserSecrets<GeocodeApiServiceTests>()
             .Build();
 
@@ -32,7 +33,6 @@ public class GeocodeApiServiceTests
     }
 
     [Test]
-    [Category("Integration")]
     public async Task GetCoordinatesByCityName_ShouldReturnValidCoordinates()
     {
         // Arrange
