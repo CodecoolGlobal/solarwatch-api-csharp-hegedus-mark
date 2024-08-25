@@ -18,7 +18,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("Register")]
-    public async Task<ActionResult<RegistrationResponse>> Register(RegistrationRequest request,
+    public async Task<ActionResult<AuthResponse>> Register(RegistrationRequest request,
         IOptions<RoleSettings> roleSettings)
     {
         if (!ModelState.IsValid)
@@ -35,7 +35,7 @@ public class AuthController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        return CreatedAtAction(nameof(Register), new RegistrationResponse(result.Email, result.UserName));
+        return Ok(new AuthResponse(result.Email, result.UserName, result.Token));
     }
 
     [HttpPost("Login")]
