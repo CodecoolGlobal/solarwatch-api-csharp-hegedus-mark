@@ -1,16 +1,23 @@
+import React, {ReactNode} from "react";
 import {createBrowserRouter, RouterProvider, Navigate} from 'react-router-dom';
-import './App.css'
+
 import {AuthProvider, useAuth} from "./contexts/AuthContext.tsx";
+import './App.css'
 
 import {Home, Login, AdminDashboard, Main} from "./pages";
+import {Register} from "./pages/Register.tsx";
 
 
-const ProtectedRoute = ({children}) => {
+interface RouteProps {
+    children: ReactNode;
+}
+
+const ProtectedRoute: React.FC<RouteProps> = ({children}) => {
     const {authInfo} = useAuth();
     return authInfo.authenticated ? children : <Navigate to="/login"/>
 }
 
-const AdminRoute = ({children}) => {
+const AdminRoute: React.FC<RouteProps> = ({children}) => {
     const {authInfo} = useAuth();
     return authInfo.authenticated && authInfo.userRole === "admin" ? children : <Navigate to="/login"/>
 }
@@ -23,6 +30,10 @@ const router = createBrowserRouter([
     {
         path: "/login",
         element: <Login/>
+    },
+    {
+        path: "/register",
+        element: <Register/>
     },
     {
         path: "/admin",

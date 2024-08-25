@@ -4,7 +4,7 @@ import {useAuth} from '../contexts/AuthContext.tsx';
 import {ILoginDetails} from '../types.ts';
 import {useNavigate} from "react-router-dom";
 
-export const Login = () => {
+export const Login: React.FC = () => {
     const {login, error, authInfo} = useAuth();
     const [loginDetails, setLoginDetails] = useState<ILoginDetails>({email: '', password: ''});
     const navigate = useNavigate();

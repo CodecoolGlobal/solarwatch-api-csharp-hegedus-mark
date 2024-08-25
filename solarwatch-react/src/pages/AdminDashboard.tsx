@@ -1,5 +1,6 @@
+import React from "react";
 
-export const AdminDashboard = () => {
+export const AdminDashboard: React.FC = () => {
     return (
         <div>
 

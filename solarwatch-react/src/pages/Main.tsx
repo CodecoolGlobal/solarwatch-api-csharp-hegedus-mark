@@ -1,7 +1,7 @@
 import {fetchSunriseSunset, ICityWithSunriseSunsetResponse} from "../utils/endpointHelpers.ts";
 import React, {useState} from "react";
 
-export const Main = () => {
+export const Main: React.FC = () => {
     const [cityName, setCityName] = useState<string>('');
     const [results, setResults] = useState<ICityWithSunriseSunsetResponse[]>([]);
     const [error, setError] = useState<string | null>(null);

@@ -1,4 +1,5 @@
-const PORT = 8080;
+
+export const PORT = 8080;
 
 const API_BASE_URL = `http://localhost:${PORT}/api`;
 

@@ -26,20 +26,24 @@ export const fetcher = async (url: string, options: RequestInit = {}) => {
 
     try {
         const response = await fetch(url, config);
+        const contentType = response.headers.get('Content-Type');
+        const isJson = contentType && contentType.includes('application/json');
+
 
         if (!response.ok) {
-            // Handle HTTP errors (e.g., 404, 500)
-            throw new Error(`HTTP error! Status: ${response.status}`);
+            // Try to get the error message from the body
+            let errorMessage = `HTTP error! Status: ${response.status}`;
+            if (isJson) {
+                const errorBody = await response.json();
+                errorMessage += ` - ${errorBody.message || JSON.stringify(errorBody)}`;
+            } else {
+                const errorText = await response.text();
+                errorMessage += ` - ${errorText}`;
+            }
+            throw new Error(errorMessage);
         }
 
-        // Parse JSON response if content type is JSON
-        const contentType = response.headers.get('Content-Type');
-        if (contentType && contentType.includes('application/json')) {
-            return await response.json();
-        }
-
-        // Return the response as-is if not JSON
-        return await response.text();
+        return isJson ? await response.json() : await response.text();
     } catch (error) {
         // Handle fetch errors or network issues
         console.error('Fetch error:', error);
