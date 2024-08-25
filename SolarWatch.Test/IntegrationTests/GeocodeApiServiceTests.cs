@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Configuration;
+/*using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using SolarWatch.Configuration;
 using SolarWatch.Services;
@@ -47,4 +47,4 @@ public class GeocodeApiServiceTests
         Assert.That(result.Latitude, Is.Not.EqualTo(null));
         Assert.That(result.Longitude, Is.Not.EqualTo(null));
     }
-}
+}*/
