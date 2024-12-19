@@ -2,13 +2,12 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SolarWatch.Data;
 using SolarWatch.Services.Authentication;
 
-namespace SolarWatch.Test.TestHelpers;
+namespace SolarWatch.Test;
 
 public class SolarWatchWebApplicationFactory : WebApplicationFactory<Program>
 {
